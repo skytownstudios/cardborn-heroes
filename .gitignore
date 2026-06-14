@@ -17,3 +17,7 @@ ios/**/xcuserdata/
 
 # Logs (keep REBUILD_SESSION.log tracked for audit)
 # docs/REBUILD_SESSION.log
+
+# Scripts / debug artifacts
+shared/scripts/node_modules/
+**/_debug/
