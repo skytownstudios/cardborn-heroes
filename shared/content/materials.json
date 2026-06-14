@@ -1,0 +1,22 @@
+{
+  "materials": [
+    {
+      "id": "mat_hero_essence",
+      "name": "Hero Essence",
+      "art": "ui/mat_hero_essence.png",
+      "description": "Used to craft and upgrade heroes."
+    },
+    {
+      "id": "mat_steel",
+      "name": "Steel Scrap",
+      "art": "ui/mat_steel.png",
+      "description": "Common metal for weapons and armor."
+    },
+    {
+      "id": "mat_arcane_dust",
+      "name": "Arcane Dust",
+      "art": "ui/mat_arcane_dust.png",
+      "description": "Magical residue for caster gear."
+    }
+  ]
+}

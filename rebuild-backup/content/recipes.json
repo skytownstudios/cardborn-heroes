@@ -1,0 +1,61 @@
+{
+  "recipes": [
+    {
+      "id": "recipe_knight",
+      "resultType": "hero",
+      "resultId": "hero_knight",
+      "name": "Craft Basic Knight",
+      "materials": [
+        { "id": "mat_hero_essence", "qty": 10 },
+        { "id": "mat_steel", "qty": 5 }
+      ]
+    },
+    {
+      "id": "recipe_archer",
+      "resultType": "hero",
+      "resultId": "hero_archer",
+      "name": "Craft Basic Archer",
+      "materials": [
+        { "id": "mat_hero_essence", "qty": 10 },
+        { "id": "mat_steel", "qty": 3 }
+      ]
+    },
+    {
+      "id": "recipe_mage",
+      "resultType": "hero",
+      "resultId": "hero_mage",
+      "name": "Craft Basic Mage",
+      "materials": [
+        { "id": "mat_hero_essence", "qty": 10 },
+        { "id": "mat_arcane_dust", "qty": 8 }
+      ]
+    },
+    {
+      "id": "recipe_sword",
+      "resultType": "gear",
+      "resultId": "gear_sword",
+      "name": "Craft Basic Sword",
+      "materials": [
+        { "id": "mat_steel", "qty": 8 }
+      ]
+    },
+    {
+      "id": "recipe_bow",
+      "resultType": "gear",
+      "resultId": "gear_bow",
+      "name": "Craft Basic Bow",
+      "materials": [
+        { "id": "mat_steel", "qty": 6 }
+      ]
+    },
+    {
+      "id": "recipe_staff",
+      "resultType": "gear",
+      "resultId": "gear_staff",
+      "name": "Craft Basic Staff",
+      "materials": [
+        { "id": "mat_arcane_dust", "qty": 10 }
+      ]
+    }
+  ]
+}

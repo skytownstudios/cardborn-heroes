@@ -1,0 +1,58 @@
+{
+  "packs": [
+    {
+      "id": "ascendant_basic",
+      "name": "Basic Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "basic",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (basic or lower), 1 guaranteed basic+ slot (hero or gear).",
+      "currency": "gold",
+      "cost": 500
+    },
+    {
+      "id": "ascendant_common",
+      "name": "Common Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "common",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (common or lower), 1 guaranteed common+ slot (hero or gear).",
+      "currency": "gold",
+      "cost": 1200
+    },
+    {
+      "id": "ascendant_uncommon",
+      "name": "Uncommon Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "uncommon",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (uncommon or lower), 1 guaranteed uncommon+ slot (hero or gear).",
+      "currency": "gold",
+      "cost": 2500
+    },
+    {
+      "id": "ascendant_rare",
+      "name": "Rare Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "rare",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (rare or lower), 1 guaranteed rare+ slot (hero or gear).",
+      "currency": "gems",
+      "cost": 150
+    },
+    {
+      "id": "ascendant_epic",
+      "name": "Epic Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "epic",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (epic or lower), 1 guaranteed epic+ slot (hero or gear).",
+      "currency": "gems",
+      "cost": 350
+    },
+    {
+      "id": "ascendant_mythic",
+      "name": "Mythic Ascendant Pack",
+      "packLine": "ascendant",
+      "tier": "mythic",
+      "description": "Ascendant pack \u2014 8 mixed cards/materials (mythic or lower), 1 guaranteed mythic+ slot (hero or gear).",
+      "currency": "gems",
+      "cost": 750
+    }
+  ]
+}

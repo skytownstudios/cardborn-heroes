@@ -1,0 +1,40 @@
+{
+  "campaigns": [
+    {
+      "id": "campaign_main",
+      "name": "Cardborn Campaign",
+      "description": "The path of the Cardborn begins here.",
+      "stages": [
+        { "id": "stage_1", "name": "Whispering Woods 1", "recommendedPower": 200, "rewards": { "gold": 100 } },
+        { "id": "stage_2", "name": "Whispering Woods 2", "recommendedPower": 350, "rewards": { "gold": 150 } },
+        { "id": "stage_3", "name": "Whispering Woods 3", "recommendedPower": 500, "rewards": { "gold": 200 } }
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "id": "zone_training",
+      "name": "Training Grounds",
+      "type": "level",
+      "description": "Practice fights with scaling difficulty.",
+      "levels": [
+        { "id": "train_1", "name": "Sparring I", "recommendedPower": 150 },
+        { "id": "train_2", "name": "Sparring II", "recommendedPower": 300 }
+      ]
+    }
+  ],
+  "farmAreas": [
+    {
+      "id": "farm_goblin_hills",
+      "name": "Goblin Hills",
+      "description": "AFK farm mobs for gold and materials.",
+      "idleRewards": { "goldPerHour": 120, "materials": [{ "id": "mat_steel", "qtyPerHour": 2 }] }
+    },
+    {
+      "id": "farm_arcane_ruins",
+      "name": "Arcane Ruins",
+      "description": "Farm arcane dust from lingering spirits.",
+      "idleRewards": { "goldPerHour": 80, "materials": [{ "id": "mat_arcane_dust", "qtyPerHour": 3 }] }
+    }
+  ]
+}

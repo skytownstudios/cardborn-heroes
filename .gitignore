@@ -1,0 +1,19 @@
+# Build
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.apk
+*.aab
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# iOS
+ios/**/DerivedData/
+ios/**/xcuserdata/
+
+# Logs (keep REBUILD_SESSION.log tracked for audit)
+# docs/REBUILD_SESSION.log

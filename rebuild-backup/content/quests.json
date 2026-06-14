@@ -1,0 +1,28 @@
+{
+  "quests": [
+    {
+      "id": "quest_first_fight",
+      "title": "First Blood",
+      "description": "Win 1 campaign stage.",
+      "rewardPackId": "ascendant_basic",
+      "progressTarget": 1,
+      "type": "campaign_wins"
+    },
+    {
+      "id": "quest_open_pack",
+      "title": "New Recruits",
+      "description": "Open 1 Ascendant pack in Shop → Open Packs.",
+      "rewardPackId": "ascendant_basic",
+      "progressTarget": 1,
+      "type": "packs_opened"
+    },
+    {
+      "id": "quest_build_hand",
+      "title": "Board Builder",
+      "description": "Equip a full hand with at least 1 hero and gear.",
+      "rewardPackId": "ascendant_common",
+      "progressTarget": 1,
+      "type": "hands_built"
+    }
+  ]
+}

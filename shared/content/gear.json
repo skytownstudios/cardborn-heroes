@@ -1,0 +1,368 @@
+{
+  "gear": [
+    {
+      "id": "gear_sword",
+      "name": "Basic Sword",
+      "slot": "weapon",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 25,
+        "hp": 1,
+        "def": 10
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Basic-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow",
+      "name": "Basic Bow",
+      "slot": "weapon",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 35,
+        "hp": 50,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Basic-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff",
+      "name": "Basic Staff",
+      "slot": "weapon",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 40,
+        "hp": 30,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Basic-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_common",
+      "name": "Common Sword",
+      "slot": "weapon",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 28,
+        "hp": 1,
+        "def": 11
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Common-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_common",
+      "name": "Common Bow",
+      "slot": "weapon",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 40,
+        "hp": 57,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Common-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_common",
+      "name": "Common Staff",
+      "slot": "weapon",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 46,
+        "hp": 34,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Common-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_uncommon",
+      "name": "Uncommon Sword",
+      "slot": "weapon",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 33,
+        "hp": 1,
+        "def": 13
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Uncommon-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_uncommon",
+      "name": "Uncommon Bow",
+      "slot": "weapon",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 46,
+        "hp": 66,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Uncommon-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_uncommon",
+      "name": "Uncommon Staff",
+      "slot": "weapon",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 52,
+        "hp": 39,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Uncommon-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_rare",
+      "name": "Rare Sword",
+      "slot": "weapon",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 38,
+        "hp": 1,
+        "def": 15
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Rare-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_rare",
+      "name": "Rare Bow",
+      "slot": "weapon",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 53,
+        "hp": 76,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Rare-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_rare",
+      "name": "Rare Staff",
+      "slot": "weapon",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 60,
+        "hp": 45,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Rare-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_epic",
+      "name": "Epic Sword",
+      "slot": "weapon",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 43,
+        "hp": 1,
+        "def": 17
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Epic-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_epic",
+      "name": "Epic Bow",
+      "slot": "weapon",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 61,
+        "hp": 87,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Epic-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_epic",
+      "name": "Epic Staff",
+      "slot": "weapon",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 70,
+        "hp": 52,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Epic-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_mythic",
+      "name": "Mythic Sword",
+      "slot": "weapon",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 50,
+        "hp": 1,
+        "def": 20
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Mythic-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_mythic",
+      "name": "Mythic Bow",
+      "slot": "weapon",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 70,
+        "hp": 100,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Mythic-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_mythic",
+      "name": "Mythic Staff",
+      "slot": "weapon",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 80,
+        "hp": 60,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Mythic-tier Focuses arcane power."
+    },
+    {
+      "id": "gear_sword_cardborn",
+      "name": "Cardborn Sword",
+      "slot": "weapon",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/sword.png",
+      "bonus": {
+        "atk": 58,
+        "hp": 1,
+        "def": 23
+      },
+      "compatibleRoles": [
+        "tank",
+        "ranger"
+      ],
+      "description": "Cardborn-tier A sturdy blade."
+    },
+    {
+      "id": "gear_bow_cardborn",
+      "name": "Cardborn Bow",
+      "slot": "weapon",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/bow.png",
+      "bonus": {
+        "atk": 82,
+        "hp": 117,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "ranger"
+      ],
+      "description": "Cardborn-tier Standard ranged weapon."
+    },
+    {
+      "id": "gear_staff_cardborn",
+      "name": "Cardborn Staff",
+      "slot": "weapon",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/staff.png",
+      "bonus": {
+        "atk": 94,
+        "hp": 70,
+        "def": 1
+      },
+      "compatibleRoles": [
+        "caster"
+      ],
+      "description": "Cardborn-tier Focuses arcane power."
+    }
+  ]
+}

@@ -1,0 +1,319 @@
+{
+  "heroes": [
+    {
+      "id": "hero_knight",
+      "name": "Basic Knight",
+      "role": "tank",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 1200,
+        "atk": 85,
+        "def": 60
+      },
+      "description": "Basic-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer",
+      "name": "Basic Archer",
+      "role": "ranger",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 750,
+        "atk": 110,
+        "def": 35
+      },
+      "description": "Basic-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage",
+      "name": "Basic Mage",
+      "role": "caster",
+      "tier": "basic",
+      "rarity": "basic",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 680,
+        "atk": 130,
+        "def": 25
+      },
+      "description": "Basic-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_common",
+      "name": "Common Knight",
+      "role": "tank",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 1380,
+        "atk": 97,
+        "def": 69
+      },
+      "description": "Common-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_common",
+      "name": "Common Archer",
+      "role": "ranger",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 862,
+        "atk": 126,
+        "def": 40
+      },
+      "description": "Common-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_common",
+      "name": "Common Mage",
+      "role": "caster",
+      "tier": "common",
+      "rarity": "common",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 781,
+        "atk": 149,
+        "def": 28
+      },
+      "description": "Common-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_uncommon",
+      "name": "Uncommon Knight",
+      "role": "tank",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 1584,
+        "atk": 112,
+        "def": 79
+      },
+      "description": "Uncommon-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_uncommon",
+      "name": "Uncommon Archer",
+      "role": "ranger",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 990,
+        "atk": 145,
+        "def": 46
+      },
+      "description": "Uncommon-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_uncommon",
+      "name": "Uncommon Mage",
+      "role": "caster",
+      "tier": "uncommon",
+      "rarity": "uncommon",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 897,
+        "atk": 171,
+        "def": 33
+      },
+      "description": "Uncommon-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_rare",
+      "name": "Rare Knight",
+      "role": "tank",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 1824,
+        "atk": 129,
+        "def": 91
+      },
+      "description": "Rare-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_rare",
+      "name": "Rare Archer",
+      "role": "ranger",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 1140,
+        "atk": 167,
+        "def": 53
+      },
+      "description": "Rare-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_rare",
+      "name": "Rare Mage",
+      "role": "caster",
+      "tier": "rare",
+      "rarity": "rare",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 1033,
+        "atk": 197,
+        "def": 38
+      },
+      "description": "Rare-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_epic",
+      "name": "Epic Knight",
+      "role": "tank",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 2100,
+        "atk": 148,
+        "def": 105
+      },
+      "description": "Epic-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_epic",
+      "name": "Epic Archer",
+      "role": "ranger",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 1312,
+        "atk": 192,
+        "def": 61
+      },
+      "description": "Epic-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_epic",
+      "name": "Epic Mage",
+      "role": "caster",
+      "tier": "epic",
+      "rarity": "epic",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 1190,
+        "atk": 227,
+        "def": 43
+      },
+      "description": "Epic-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_mythic",
+      "name": "Mythic Knight",
+      "role": "tank",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 2400,
+        "atk": 170,
+        "def": 120
+      },
+      "description": "Mythic-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_mythic",
+      "name": "Mythic Archer",
+      "role": "ranger",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 1500,
+        "atk": 220,
+        "def": 70
+      },
+      "description": "Mythic-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_mythic",
+      "name": "Mythic Mage",
+      "role": "caster",
+      "tier": "mythic",
+      "rarity": "mythic",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 1360,
+        "atk": 260,
+        "def": 50
+      },
+      "description": "Mythic-tier Arcane damage dealer."
+    },
+    {
+      "id": "hero_knight_cardborn",
+      "name": "Cardborn Knight",
+      "role": "tank",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/knight.png",
+      "battleArt": "cards/knight_battle.png",
+      "stats": {
+        "hp": 2820,
+        "atk": 199,
+        "def": 141
+      },
+      "description": "Cardborn-tier Frontline shield bearer."
+    },
+    {
+      "id": "hero_archer_cardborn",
+      "name": "Cardborn Archer",
+      "role": "ranger",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/archer.png",
+      "battleArt": "cards/archer_battle.png",
+      "stats": {
+        "hp": 1762,
+        "atk": 258,
+        "def": 82
+      },
+      "description": "Cardborn-tier Ranged striker."
+    },
+    {
+      "id": "hero_mage_cardborn",
+      "name": "Cardborn Mage",
+      "role": "caster",
+      "tier": "cardborn",
+      "rarity": "cardborn",
+      "art": "cards/mage.png",
+      "battleArt": "cards/mage_battle.png",
+      "stats": {
+        "hp": 1598,
+        "atk": 305,
+        "def": 58
+      },
+      "description": "Cardborn-tier Arcane damage dealer."
+    }
+  ]
+}

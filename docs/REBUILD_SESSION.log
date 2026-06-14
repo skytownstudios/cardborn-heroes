@@ -1,0 +1,6 @@
+﻿2026-06-14 07:39:44 UTC | phase=1 | placeholder assets regenerated | cpu=17% ram=17.02/63.83 GB disk_free=5377.47 GB
+2026-06-14 07:39:57 UTC | phase=2 | starting assembleDebug | cpu=10% ram=16.8/63.83 GB disk_free=5377.47 GB
+2026-06-14 07:41:05 UTC | phase=2 | assembleDebug exit=0 | cpu=14% ram=16.18/63.83 GB disk_free=5377.14 GB
+2026-06-14 07:41:10 UTC | phase=11 | starting pixel-6 deploy | cpu=33% ram=16.13/63.83 GB disk_free=5377.14 GB
+2026-06-14 07:41:33 UTC | phase=11 | pixel-6 deploy finished exit=0 | cpu=21% ram=18.53/63.83 GB disk_free=5377.11 GB
+2026-06-14 07:41:45 UTC | phase=11 | REBUILD COMPLETE - Android on Pixel 6, iOS shell added, no destructive ops run | cpu=15% ram=18.52/63.83 GB disk_free=5377.11 GB

@@ -1,0 +1,33 @@
+name: Dual platform build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Generate content
+        run: node shared/scripts/generate_tier_content.js
+      - name: Sync assets
+        run: node shared/scripts/sync.js
+      - name: Assemble debug
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+        env:
+          ORG_GRADLE_PROJECT_org.gradle.parallel: "false"
+          ORG_GRADLE_PROJECT_org.gradle.workers.max: "2"
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify iOS scaffold
+        run: test -f ios/CardbornHeroes/CardbornHeroesApp.swift
