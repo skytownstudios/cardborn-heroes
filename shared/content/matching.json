@@ -1,9 +1,0 @@
-{
-  "title": "Match the pairs!",
-  "pairs": [
-    { "id": "1", "emoji": "🐄", "label": "Cow" },
-    { "id": "2", "emoji": "🐷", "label": "Pig" },
-    { "id": "3", "emoji": "🐔", "label": "Chicken" },
-    { "id": "4", "emoji": "🐑", "label": "Sheep" }
-  ]
-}
