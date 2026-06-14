@@ -10,7 +10,7 @@ data class HeroDef(
     val role: String,
     val tier: String,
     val art: String,
-    val battleArt: String,
+    val battleRig: String,
     val stats: HeroStats
 )
 
@@ -133,7 +133,8 @@ data class PackRevealCard(
 
 data class BattleUnit(
     val name: String,
-    val artAsset: String,
+    val artAsset: String = "",
+    val battleRigId: String? = null,
     val hp: Int,
     val maxHp: Int,
     val atk: Int,

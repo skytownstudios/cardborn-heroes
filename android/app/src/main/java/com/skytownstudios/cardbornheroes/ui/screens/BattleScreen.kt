@@ -12,6 +12,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.*
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +28,8 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.skytownstudios.cardbornheroes.data.BattleUnit
 import com.skytownstudios.cardbornheroes.ui.GameViewModel
+import com.skytownstudios.cardbornheroes.ui.components.AssetIcon
+import com.skytownstudios.cardbornheroes.ui.components.BattleRigView
 import com.skytownstudios.cardbornheroes.ui.components.GameButton
 import com.skytownstudios.cardbornheroes.ui.components.MiniCardArt
 import com.skytownstudios.cardbornheroes.ui.theme.*
@@ -60,9 +63,19 @@ private fun BattleHub(vm: GameViewModel) {
                 onClick = { vm.showQuests = true },
                 modifier = Modifier.align(Alignment.CenterEnd)
             ) {
-                Icon(Icons.Filled.MenuBook, contentDescription = "Quests", tint = HeroGold)
+                AssetIcon("ui/icon_quests.png", "Quests", size = 28.dp)
             }
         }
+
+        AsyncImage(
+            model = "file:///android_asset/maps/whispering_woods.png",
+            contentDescription = "Campaign map",
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(120.dp)
+                .clip(RoundedCornerShape(12.dp)),
+            contentScale = ContentScale.Crop
+        )
 
         Row(
             Modifier.fillMaxWidth(),
@@ -72,26 +85,12 @@ private fun BattleHub(vm: GameViewModel) {
                 val cleared = index < player.campaignStageIndex
                 val current = index == player.campaignStageIndex
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Box(
-                        Modifier
-                            .size(52.dp)
-                            .clip(CircleShape)
-                            .background(
-                                when {
-                                    cleared -> HeroGold
-                                    current -> HeroGold.copy(alpha = 0.5f)
-                                    else -> MintBgDeep
-                                }
-                            )
-                            .border(2.dp, HeroCardBorder, CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            "${index + 1}",
-                            fontWeight = FontWeight.Bold,
-                            color = if (cleared || current) ButtonTextOnAccent else TextMuted
-                        )
+                    val nodeAsset = when {
+                        cleared -> "maps/node_cleared.png"
+                        current -> "maps/node_current.png"
+                        else -> "maps/node_locked.png"
                     }
+                    AssetIcon(nodeAsset, stage.name, size = 52.dp)
                     Text(
                         stage.name,
                         fontSize = 10.sp,
@@ -246,21 +245,35 @@ private val enemySlots = listOf(
 @Composable
 fun BattleOverlay(vm: GameViewModel) {
     val battle = vm.battle ?: return
+    var attackPulse by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(battle.stageName) {
         while (vm.battle?.finished == false) {
             delay(750)
             vm.advanceBattle()
+            attackPulse++
         }
     }
 
     Box(Modifier.fillMaxSize()) {
+        AsyncImage(
+            model = "file:///android_asset/battle/arena_whispering_woods.png",
+            contentDescription = null,
+            modifier = Modifier
+                .fillMaxSize()
+                .alpha(0.92f),
+            contentScale = ContentScale.Crop
+        )
         Box(
             Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(Color(0xFFD4C4A8), Color(0xFFB8A078), Color(0xFF9A8468))
+                        listOf(
+                            Color(0xFFD4C4A8).copy(alpha = 0.35f),
+                            Color(0xFFB8A078).copy(alpha = 0.45f),
+                            Color(0xFF9A8468).copy(alpha = 0.55f)
+                        )
                     )
                 )
         )
@@ -300,6 +313,7 @@ fun BattleOverlay(vm: GameViewModel) {
                         BattleFighter(
                             unit = unit,
                             isEnemy = false,
+                            attackPulse = attackPulse,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .offset(x = w * xf - 44.dp, y = h * yf)
@@ -312,6 +326,8 @@ fun BattleOverlay(vm: GameViewModel) {
                         BattleFighter(
                             unit = unit,
                             isEnemy = true,
+                            attackPulse = attackPulse,
+                            flipHorizontal = true,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
                                 .offset(x = w * xf - 44.dp, y = h * yf)
@@ -349,7 +365,13 @@ fun BattleOverlay(vm: GameViewModel) {
 }
 
 @Composable
-private fun BattleFighter(unit: BattleUnit, isEnemy: Boolean, modifier: Modifier = Modifier) {
+private fun BattleFighter(
+    unit: BattleUnit,
+    isEnemy: Boolean,
+    attackPulse: Int = 0,
+    flipHorizontal: Boolean = false,
+    modifier: Modifier = Modifier
+) {
     val alive = unit.hp > 0
     val hpFrac = unit.hp.toFloat() / unit.maxHp.coerceAtLeast(1)
     val platformGlow = if (isEnemy) {
@@ -369,12 +391,21 @@ private fun BattleFighter(unit: BattleUnit, isEnemy: Boolean, modifier: Modifier
                     .clip(CircleShape)
                     .background(platformGlow)
             )
-            AsyncImage(
-                model = "file:///android_asset/${unit.artAsset}",
-                contentDescription = unit.name,
-                modifier = Modifier.size(64.dp),
-                contentScale = ContentScale.Fit
-            )
+            if (!unit.battleRigId.isNullOrBlank()) {
+                BattleRigView(
+                    rigId = unit.battleRigId,
+                    attackPulse = attackPulse,
+                    flipHorizontal = flipHorizontal,
+                    modifier = Modifier.size(64.dp)
+                )
+            } else if (unit.artAsset.isNotBlank()) {
+                AsyncImage(
+                    model = "file:///android_asset/${unit.artAsset}",
+                    contentDescription = unit.name,
+                    modifier = Modifier.size(64.dp),
+                    contentScale = ContentScale.Fit
+                )
+            }
         }
 
         Column(

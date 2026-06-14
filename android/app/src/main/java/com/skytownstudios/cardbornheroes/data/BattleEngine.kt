@@ -15,12 +15,26 @@ object BattleEngine {
             when (slot.type) {
                 "hero" -> {
                     val h = content.hero(slot.cardId) ?: return@mapNotNull null
-                    BattleUnit(h.name, h.battleArt, h.stats.hp, h.stats.hp, h.stats.atk, h.stats.def)
+                    BattleUnit(
+                        name = h.name,
+                        battleRigId = h.battleRig,
+                        hp = h.stats.hp,
+                        maxHp = h.stats.hp,
+                        atk = h.stats.atk,
+                        def = h.stats.def
+                    )
                 }
                 "gear" -> {
                     val g = content.gear(slot.cardId) ?: return@mapNotNull null
                     val hp = (g.bonus.hp + g.bonus.def).coerceAtLeast(50)
-                    BattleUnit(g.name, g.art, hp, hp, g.bonus.atk, g.bonus.def)
+                    BattleUnit(
+                        name = g.name,
+                        artAsset = g.art,
+                        hp = hp,
+                        maxHp = hp,
+                        atk = g.bonus.atk,
+                        def = g.bonus.def
+                    )
                 }
                 else -> null
             }
@@ -34,7 +48,7 @@ object BattleEngine {
             val def = (perEnemyPower / 8).coerceIn(5, 40)
             BattleUnit(
                 name = enemyNames[i % enemyNames.size],
-                artAsset = "cards/knight_battle.png",
+                battleRigId = "knight",
                 hp = hp,
                 maxHp = hp,
                 atk = atk,

@@ -12,9 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Inventory2
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +25,6 @@ import com.skytownstudios.cardbornheroes.ui.GameViewModel
 import com.skytownstudios.cardbornheroes.ui.theme.HeroGold
 import com.skytownstudios.cardbornheroes.ui.theme.MintBgDeep
 import com.skytownstudios.cardbornheroes.ui.theme.SurfaceBorder
-import com.skytownstudios.cardbornheroes.ui.theme.SurfaceMint
 import com.skytownstudios.cardbornheroes.ui.theme.TextMuted
 import com.skytownstudios.cardbornheroes.ui.theme.TextPrimary
 
@@ -40,7 +36,7 @@ fun TopBar(vm: GameViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(SurfaceMint)
+            .background(com.skytownstudios.cardbornheroes.ui.theme.SurfaceMint)
             .border(1.dp, SurfaceBorder.copy(alpha = 0.3f))
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -59,7 +55,7 @@ fun TopBar(vm: GameViewModel) {
                     .border(2.dp, HeroGold, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Text("CH", fontWeight = FontWeight.Bold, fontSize = 12.sp, color = TextPrimary)
+                AssetIcon("ui/icon_profile.png", "Profile", size = 28.dp)
             }
             Column {
                 Text("Hero", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = TextPrimary)
@@ -71,17 +67,17 @@ fun TopBar(vm: GameViewModel) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            CurrencyBadge("👑", player.crowns.toString())
-            CurrencyBadge("✦", player.sigils.toString())
+            CurrencyBadge("ui/currency_crowns.png", player.crowns.toString())
+            CurrencyBadge("ui/currency_sigils.png", player.sigils.toString())
             IconButton(onClick = { vm.showVault = true }, modifier = Modifier.size(36.dp)) {
-                Icon(Icons.Filled.Inventory2, contentDescription = "Vault", tint = TextPrimary)
+                AssetIcon("ui/icon_bag.png", "Vault", size = 28.dp)
             }
         }
     }
 }
 
 @Composable
-private fun CurrencyBadge(icon: String, amount: String) {
+private fun CurrencyBadge(iconAsset: String, amount: String) {
     Row(
         modifier = Modifier
             .clip(RoundedCornerShape(20.dp))
@@ -91,7 +87,7 @@ private fun CurrencyBadge(icon: String, amount: String) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Text(icon, fontSize = 12.sp)
+        AssetIcon(iconAsset, null, size = 18.dp)
         Text(amount, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, color = TextPrimary)
     }
 }

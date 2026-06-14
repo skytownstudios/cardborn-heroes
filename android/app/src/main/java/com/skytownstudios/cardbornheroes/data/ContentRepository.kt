@@ -43,7 +43,7 @@ class ContentRepository(context: Context) {
                 role = o.getString("role"),
                 tier = o.getString("tier"),
                 art = o.getString("art"),
-                battleArt = o.getString("battleArt"),
+                battleRig = o.optString("battleRig", "knight"),
                 stats = HeroStats(stats.getInt("hp"), stats.getInt("atk"), stats.getInt("def"))
             )
         }
