@@ -6,6 +6,8 @@ import org.json.JSONObject
 class ContentRepository(context: Context) {
     private val assets = context.assets
 
+    val rigManifest: RigManifest by lazy { RigManifest.load(context) }
+
     val heroes: List<HeroDef> by lazy { loadHeroes() }
     val gear: List<GearDef> by lazy { loadGear() }
     val materials: List<MaterialDef> by lazy { loadMaterials() }
@@ -55,15 +57,34 @@ class ContentRepository(context: Context) {
             val o = arr.getJSONObject(i)
             val bonus = o.getJSONObject("bonus")
             val roles = o.getJSONArray("compatibleRoles")
+            val id = o.getString("id")
+            val art = o.getString("art")
+            val hands = if (o.has("hands")) o.getInt("hands") else defaultHands(id)
+            val hand = if (o.has("hand")) o.getString("hand") else defaultHand(id)
+            val battleArt = if (o.has("battleArt")) o.getString("battleArt") else art
             GearDef(
-                id = o.getString("id"),
+                id = id,
                 name = o.getString("name"),
                 tier = o.getString("tier"),
-                art = o.getString("art"),
+                art = art,
+                battleArt = battleArt,
+                hands = hands,
+                hand = hand,
                 bonus = GearBonus(bonus.getInt("atk"), bonus.getInt("hp"), bonus.getInt("def")),
                 compatibleRoles = (0 until roles.length()).map { roles.getString(it) }
             )
         }
+    }
+
+    private fun defaultHands(id: String): Int = when {
+        id.contains("staff") -> 2
+        else -> 1
+    }
+
+    private fun defaultHand(id: String): String = when {
+        id.contains("shield") -> "off"
+        id.contains("staff") -> "main"
+        else -> "main"
     }
 
     private fun loadMaterials(): List<MaterialDef> {

@@ -19,6 +19,9 @@ data class GearDef(
     val name: String,
     val tier: String,
     val art: String,
+    val battleArt: String,
+    val hands: Int,
+    val hand: String,
     val bonus: GearBonus,
     val compatibleRoles: List<String>
 )
@@ -77,11 +80,22 @@ data class FarmArea(
     val rarePackDrop: FarmPackDrop?
 )
 
-data class HandSlot(val type: String = "", val cardId: String = "") {
-    val isEmpty: Boolean get() = cardId.isEmpty()
+data class HeroLoadout(
+    val heroId: String = "",
+    val mainHandGearId: String = "",
+    val offHandGearId: String = ""
+) {
+    val isEmpty: Boolean get() = heroId.isEmpty()
 }
 
-data class Hand(val slots: List<HandSlot> = List(5) { HandSlot() })
+data class Hand(val heroSlots: List<HeroLoadout> = List(5) { HeroLoadout() })
+
+/** Hand 1: Basic Knight only, no gear equipped. */
+fun defaultStarterHands(): List<Hand> = listOf(
+    Hand(List(5) { i -> if (i == 0) HeroLoadout(heroId = "hero_knight") else HeroLoadout() }),
+    Hand(),
+    Hand()
+)
 
 data class PlayerLifetimeStats(
     val wins: Int = 0,
@@ -105,8 +119,8 @@ data class PlayerState(
         "hero_knight" to 1,
         "hero_archer" to 1
     ),
-    val gearCounts: Map<String, Int> = mapOf("gear_sword" to 1),
-    val hands: List<Hand> = List(3) { Hand() },
+    val gearCounts: Map<String, Int> = mapOf("gear_sword" to 1, "gear_shield" to 1),
+    val hands: List<Hand> = defaultStarterHands(),
     val activeHandIndex: Int = 0,
     val campaignStageIndex: Int = 0,
     val activeFarmId: String = "goblin_hills",
@@ -114,7 +128,7 @@ data class PlayerState(
     val questProgress: Map<String, Int> = emptyMap(),
     val questClaimed: Set<String> = emptySet(),
     val discoveredHeroes: Set<String> = setOf("hero_knight", "hero_archer"),
-    val discoveredGear: Set<String> = setOf("gear_sword"),
+    val discoveredGear: Set<String> = setOf("gear_sword", "gear_shield"),
     val discoveredRecipes: Set<String> = emptySet(),
     val stats: PlayerLifetimeStats = PlayerLifetimeStats(),
     val farmCrownsRemainder: Double = 0.0,
@@ -135,6 +149,9 @@ data class BattleUnit(
     val name: String,
     val artAsset: String = "",
     val battleRigId: String? = null,
+    val mainHandArt: String? = null,
+    val offHandArt: String? = null,
+    val attackStyle: String = "unarmed",
     val hp: Int,
     val maxHp: Int,
     val atk: Int,
@@ -149,5 +166,9 @@ data class BattleState(
     val logLine: String = "Battle begins!",
     val finished: Boolean = false,
     val victory: Boolean = false,
-    val crownRewardPending: Int = 0
+    val crownRewardPending: Int = 0,
+    /** "ally" or "enemy" — whose turn is next (one attack per advance). */
+    val nextSide: String = "ally",
+    /** Name of the unit that just attacked — drives battle animation. */
+    val activeAttackerName: String? = null
 )

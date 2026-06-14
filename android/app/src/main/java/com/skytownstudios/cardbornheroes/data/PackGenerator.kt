@@ -143,7 +143,7 @@ object PackGenerator {
                     type = "material",
                     id = mat.id,
                     name = mat.name,
-                    art = "",
+                    art = mat.art,
                     tier = tier,
                     isGuaranteedSlot = isGuaranteedSlot,
                     qty = qty

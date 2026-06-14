@@ -19,7 +19,7 @@
     {
       "id": "quest_build_hand",
       "title": "Hand Builder",
-      "description": "Fill active Hand with at least 1 hero and 1 gear.",
+      "description": "Equip at least 1 hero with a weapon on your active Hand.",
       "rewardPackId": "ascendant_common",
       "progressTarget": 1,
       "type": "hands_built"

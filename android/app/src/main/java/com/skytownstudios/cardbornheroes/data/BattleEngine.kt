@@ -10,34 +10,21 @@ object BattleEngine {
         hand: Hand,
         stage: CampaignStage
     ): BattleState {
-        val allies = hand.slots.mapNotNull { slot ->
+        val allies = hand.heroSlots.mapNotNull { slot ->
             if (slot.isEmpty) return@mapNotNull null
-            when (slot.type) {
-                "hero" -> {
-                    val h = content.hero(slot.cardId) ?: return@mapNotNull null
-                    BattleUnit(
-                        name = h.name,
-                        battleRigId = h.battleRig,
-                        hp = h.stats.hp,
-                        maxHp = h.stats.hp,
-                        atk = h.stats.atk,
-                        def = h.stats.def
-                    )
-                }
-                "gear" -> {
-                    val g = content.gear(slot.cardId) ?: return@mapNotNull null
-                    val hp = (g.bonus.hp + g.bonus.def).coerceAtLeast(50)
-                    BattleUnit(
-                        name = g.name,
-                        artAsset = g.art,
-                        hp = hp,
-                        maxHp = hp,
-                        atk = g.bonus.atk,
-                        def = g.bonus.def
-                    )
-                }
-                else -> null
-            }
+            val hero = content.hero(slot.heroId) ?: return@mapNotNull null
+            val stats = LoadoutHelper.mergedStats(slot, content) ?: hero.stats
+            BattleUnit(
+                name = hero.name,
+                battleRigId = hero.battleRig,
+                mainHandArt = LoadoutHelper.mainHandArt(slot, content),
+                offHandArt = LoadoutHelper.offHandArt(slot, content),
+                attackStyle = LoadoutHelper.attackStyle(slot, content),
+                hp = stats.hp,
+                maxHp = stats.hp,
+                atk = stats.atk,
+                def = stats.def
+            )
         }
 
         val enemyCount = (2 + stage.recommendedPower / 200).coerceIn(2, 5)
@@ -49,6 +36,7 @@ object BattleEngine {
             BattleUnit(
                 name = enemyNames[i % enemyNames.size],
                 battleRigId = "knight",
+                attackStyle = "melee_1h",
                 hp = hp,
                 maxHp = hp,
                 atk = atk,
@@ -65,84 +53,124 @@ object BattleEngine {
         )
     }
 
+    /** One attack per call — alternates ally then enemy so animations sync to each striker. */
     fun advance(state: BattleState): BattleState {
         if (state.finished) return state
 
-        var allies = state.allies
-        var enemies = state.enemies
-        var log = state.logLine
-
+        val allies = state.allies.toMutableList()
+        val enemies = state.enemies.toMutableList()
         val livingAllies = allies.withIndex().filter { it.value.hp > 0 }
         val livingEnemies = enemies.withIndex().filter { it.value.hp > 0 }
 
         if (livingAllies.isEmpty() || livingEnemies.isEmpty()) {
-            val victory = livingEnemies.isEmpty() && livingAllies.isNotEmpty()
-            return state.copy(
-                allies = allies,
-                enemies = enemies,
-                finished = true,
-                victory = victory,
-                crownRewardPending = if (victory) state.crownReward else 0,
-                logLine = if (victory) "Victory!" else "Defeat…"
-            )
+            return finish(state, allies, enemies, livingEnemies.isEmpty() && livingAllies.isNotEmpty())
         }
 
+        return if (state.nextSide == "ally") {
+            allyAttack(state, allies, enemies, livingAllies, livingEnemies)
+        } else {
+            enemyAttack(state, allies, enemies, livingAllies, livingEnemies)
+        }
+    }
+
+    private fun allyAttack(
+        state: BattleState,
+        allies: MutableList<BattleUnit>,
+        enemies: MutableList<BattleUnit>,
+        livingAllies: List<IndexedValue<BattleUnit>>,
+        livingEnemies: List<IndexedValue<BattleUnit>>
+    ): BattleState {
+        if (livingEnemies.isEmpty()) {
+            return finish(state, allies, enemies, victory = true)
+        }
         val attacker = livingAllies.maxByOrNull { it.value.atk }!!
         val target = livingEnemies.minByOrNull { it.value.hp }!!
         val dmg = (attacker.value.atk - target.value.def / 2).coerceAtLeast(1)
         val newHp = (target.value.hp - dmg).coerceAtLeast(0)
-        enemies = enemies.toMutableList().also { it[target.index] = target.value.copy(hp = newHp) }
-        log = "${attacker.value.name} hits ${target.value.name} for $dmg"
+        enemies[target.index] = target.value.copy(hp = newHp)
 
-        val livingEnemies2 = enemies.withIndex().filter { it.value.hp > 0 }
-        val livingAllies2 = allies.withIndex().filter { it.value.hp > 0 }
-
-        if (livingEnemies2.isEmpty()) {
-            return state.copy(
-                allies = allies,
-                enemies = enemies,
-                finished = true,
-                victory = true,
-                crownRewardPending = state.crownReward,
-                logLine = "Victory!"
-            )
-        }
-        if (livingAllies2.isEmpty()) {
-            return state.copy(
-                allies = allies,
-                enemies = enemies,
-                finished = true,
-                victory = false,
-                logLine = "Defeat…"
-            )
-        }
-
-        val eAttacker = livingEnemies2.maxByOrNull { it.value.atk }!!
-        val eTarget = livingAllies2.minByOrNull { it.value.hp }!!
-        val eDmg = (eAttacker.value.atk - eTarget.value.def / 2).coerceAtLeast(1)
-        val eNewHp = (eTarget.value.hp - eDmg).coerceAtLeast(0)
-        allies = allies.toMutableList().also { it[eTarget.index] = eTarget.value.copy(hp = eNewHp) }
-        log = "${eAttacker.value.name} hits ${eTarget.value.name} for $eDmg"
-
-        val alliesAlive = allies.any { it.hp > 0 }
+        val log = "${attacker.value.name} hits ${target.value.name} for $dmg"
         val enemiesAlive = enemies.any { it.hp > 0 }
+        val alliesAlive = allies.any { it.hp > 0 }
+
+        if (!enemiesAlive) {
+            return finish(
+                state.copy(logLine = log, activeAttackerName = attacker.value.name),
+                allies,
+                enemies,
+                victory = true
+            )
+        }
+        if (!alliesAlive) {
+            return finish(
+                state.copy(logLine = log, activeAttackerName = attacker.value.name),
+                allies,
+                enemies,
+                victory = false
+            )
+        }
+
+        return state.copy(
+            allies = allies,
+            enemies = enemies,
+            logLine = log,
+            activeAttackerName = attacker.value.name,
+            nextSide = "enemy"
+        )
+    }
+
+    private fun enemyAttack(
+        state: BattleState,
+        allies: MutableList<BattleUnit>,
+        enemies: MutableList<BattleUnit>,
+        livingAllies: List<IndexedValue<BattleUnit>>,
+        livingEnemies: List<IndexedValue<BattleUnit>>
+    ): BattleState {
+        if (livingAllies.isEmpty()) {
+            return finish(state, allies, enemies, victory = false)
+        }
+        val attacker = livingEnemies.maxByOrNull { it.value.atk }!!
+        val target = livingAllies.minByOrNull { it.value.hp }!!
+        val dmg = (attacker.value.atk - target.value.def / 2).coerceAtLeast(1)
+        val newHp = (target.value.hp - dmg).coerceAtLeast(0)
+        allies[target.index] = target.value.copy(hp = newHp)
+
+        var log = "${attacker.value.name} hits ${target.value.name} for $dmg"
+        if (Random.nextFloat() < 0.12f) log = "$log · Clash continues"
+
+        val enemiesAlive = enemies.any { it.hp > 0 }
+        val alliesAlive = allies.any { it.hp > 0 }
 
         if (!alliesAlive || !enemiesAlive) {
-            val victory = enemiesAlive.not() && alliesAlive
-            return state.copy(
-                allies = allies,
-                enemies = enemies,
-                finished = true,
-                victory = victory,
-                crownRewardPending = if (victory) state.crownReward else 0,
-                logLine = if (victory) "Victory!" else "Defeat…"
+            return finish(
+                state.copy(logLine = log, activeAttackerName = attacker.value.name),
+                allies,
+                enemies,
+                victory = enemiesAlive.not() && alliesAlive
             )
         }
 
-        if (Random.nextFloat() < 0.15f) {
-            log = "$log · Clash continues"
-        }
-
-        return state.copy(allies = allies, enemies = enemies, logLine = log)
+        return state.copy(
+            allies = allies,
+            enemies = enemies,
+            logLine = log,
+            activeAttackerName = attacker.value.name,
+            nextSide = "ally"
+        )
     }
+
+    private fun finish(
+        state: BattleState,
+        allies: List<BattleUnit>,
+        enemies: List<BattleUnit>,
+        victory: Boolean
+    ): BattleState = state.copy(
+        allies = allies,
+        enemies = enemies,
+        finished = true,
+        victory = victory,
+        crownRewardPending = if (victory) state.crownReward else 0,
+        logLine = if (victory) "Victory!" else "Defeat…",
+        activeAttackerName = null
+    )
 }

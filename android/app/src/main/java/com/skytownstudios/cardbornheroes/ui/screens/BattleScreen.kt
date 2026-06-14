@@ -2,11 +2,9 @@ package com.skytownstudios.cardbornheroes.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -27,10 +25,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.skytownstudios.cardbornheroes.data.BattleUnit
+import com.skytownstudios.cardbornheroes.data.RigManifest
 import com.skytownstudios.cardbornheroes.ui.GameViewModel
 import com.skytownstudios.cardbornheroes.ui.components.AssetIcon
-import com.skytownstudios.cardbornheroes.ui.components.BattleRigView
+import com.skytownstudios.cardbornheroes.ui.components.BattleFighterSprite
 import com.skytownstudios.cardbornheroes.ui.components.GameButton
+import com.skytownstudios.cardbornheroes.ui.components.GamePanel
 import com.skytownstudios.cardbornheroes.ui.components.MiniCardArt
 import com.skytownstudios.cardbornheroes.ui.theme.*
 import kotlinx.coroutines.delay
@@ -141,17 +141,24 @@ private fun BattleHub(vm: GameViewModel) {
         }
 
         farm?.let { f ->
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MintBgDeep),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text(f.name, fontWeight = FontWeight.Bold, color = TextPrimary)
-                    Text(f.description, fontSize = 12.sp, color = TextMuted)
-                    Text("👑 ${vm.effectiveCrownsPerHour()} Crowns/hr", fontWeight = FontWeight.SemiBold, color = HeroGold)
-                    Text("Primary: ${vm.content.material(f.primaryMaterial)?.name ?: f.primaryMaterial}", fontSize = 11.sp, color = TextMuted)
-                    f.secondaryDrop?.let {
-                        Text("Bonus drops scale with Hand power", fontSize = 11.sp, color = TextMuted)
+            GamePanel(Modifier.fillMaxWidth()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    val farmIcon = when (f.id) {
+                        "goblin_hills" -> "maps/farm_goblin_hills.png"
+                        "arcane_ruins" -> "maps/farm_arcane_ruins.png"
+                        "heroes_rest" -> "maps/farm_heroes_rest.png"
+                        "cardborn_vault" -> "maps/farm_cardborn_vault.png"
+                        else -> "maps/farm_goblin_hills.png"
+                    }
+                    AssetIcon(farmIcon, f.name, size = 56.dp)
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text(f.name, fontWeight = FontWeight.Bold, color = TextPrimary)
+                        Text(f.description, fontSize = 12.sp, color = TextMuted)
+                        Text("${vm.effectiveCrownsPerHour()} Crowns/hr", fontWeight = FontWeight.SemiBold, color = HeroGold)
+                        Text("Primary: ${vm.content.material(f.primaryMaterial)?.name ?: f.primaryMaterial}", fontSize = 11.sp, color = TextMuted)
                     }
                 }
             }
@@ -162,12 +169,8 @@ private fun BattleHub(vm: GameViewModel) {
             Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            vm.activeHand.slots.forEach { slot ->
-                val art = when (slot.type) {
-                    "hero" -> vm.content.hero(slot.cardId)?.art
-                    "gear" -> vm.content.gear(slot.cardId)?.art
-                    else -> null
-                }
+            vm.activeHand.heroSlots.forEach { slot ->
+                val art = slot.heroId.takeIf { it.isNotEmpty() }?.let { vm.content.hero(it)?.art }
                 MiniCardArt(
                     artPath = art,
                     modifier = Modifier
@@ -178,9 +181,9 @@ private fun BattleHub(vm: GameViewModel) {
         }
 
         GameButton(
-            text = "Begin",
+            text = "Battle",
             onClick = { vm.beginBattle() },
-            enabled = vm.activeHand.slots.any { !it.isEmpty } && currentStage != null
+            enabled = vm.activeHand.heroSlots.any { !it.isEmpty } && currentStage != null
         )
     }
 }
@@ -225,31 +228,36 @@ private fun QuestModal(vm: GameViewModel, onDismiss: () -> Unit) {
     }
 }
 
-/** Staggered V slots — allies left, enemies mirror right. */
+/** Battle arena positions — x/y as fractions; fighters anchored bottom-center in slot. */
 private val allySlots = listOf(
-    Pair(0.06f, 0.04f),
-    Pair(0.14f, 0.30f),
+    Pair(0.06f, 0.38f),
     Pair(0.06f, 0.58f),
-    Pair(0.28f, 0.12f),
-    Pair(0.28f, 0.46f),
+    Pair(0.22f, 0.48f),
+    Pair(0.22f, 0.68f),
+    Pair(0.38f, 0.58f),
 )
 
 private val enemySlots = listOf(
-    Pair(0.94f, 0.04f),
-    Pair(0.86f, 0.30f),
+    Pair(0.94f, 0.38f),
     Pair(0.94f, 0.58f),
-    Pair(0.72f, 0.12f),
-    Pair(0.72f, 0.46f),
+    Pair(0.78f, 0.48f),
+    Pair(0.78f, 0.68f),
+    Pair(0.62f, 0.58f),
 )
+
+private val fighterSpriteWidth = 120.dp
+private val fighterSpriteHeight = 150.dp
+private val fighterColumnWidth = 108.dp
 
 @Composable
 fun BattleOverlay(vm: GameViewModel) {
     val battle = vm.battle ?: return
     var attackPulse by remember { mutableIntStateOf(0) }
+    val attackerName = battle.activeAttackerName
 
     LaunchedEffect(battle.stageName) {
         while (vm.battle?.finished == false) {
-            delay(750)
+            delay(650)
             vm.advanceBattle()
             attackPulse++
         }
@@ -303,34 +311,44 @@ fun BattleOverlay(vm: GameViewModel) {
                 Modifier
                     .weight(1f)
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 8.dp)
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
             ) {
                 val w = maxWidth
                 val h = maxHeight
                 battle.allies.forEachIndexed { i, unit ->
-                    if (i < allySlots.size) {
+                    if (i < allySlots.size && unit.hp > 0) {
                         val (xf, yf) = allySlots[i]
                         BattleFighter(
                             unit = unit,
+                            rigManifest = vm.content.rigManifest,
                             isEnemy = false,
                             attackPulse = attackPulse,
+                            isAttacking = unit.name == attackerName && !battle.finished,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .offset(x = w * xf - 44.dp, y = h * yf)
+                                .offset(
+                                    x = (w * xf - fighterColumnWidth / 2).coerceAtLeast(0.dp),
+                                    y = h * yf
+                                )
                         )
                     }
                 }
                 battle.enemies.forEachIndexed { i, unit ->
-                    if (i < enemySlots.size) {
+                    if (i < enemySlots.size && unit.hp > 0) {
                         val (xf, yf) = enemySlots[i]
                         BattleFighter(
                             unit = unit,
+                            rigManifest = vm.content.rigManifest,
                             isEnemy = true,
                             attackPulse = attackPulse,
+                            isAttacking = unit.name == attackerName && !battle.finished,
                             flipHorizontal = true,
                             modifier = Modifier
                                 .align(Alignment.TopStart)
-                                .offset(x = w * xf - 44.dp, y = h * yf)
+                                .offset(
+                                    x = (w * xf - fighterColumnWidth / 2).coerceAtMost(w - fighterColumnWidth),
+                                    y = h * yf
+                                )
                         )
                     }
                 }
@@ -367,42 +385,48 @@ fun BattleOverlay(vm: GameViewModel) {
 @Composable
 private fun BattleFighter(
     unit: BattleUnit,
+    rigManifest: RigManifest,
     isEnemy: Boolean,
     attackPulse: Int = 0,
+    isAttacking: Boolean = false,
     flipHorizontal: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val alive = unit.hp > 0
     val hpFrac = unit.hp.toFloat() / unit.maxHp.coerceAtLeast(1)
-    val platformGlow = if (isEnemy) {
-        Brush.radialGradient(listOf(Color(0xFFE07A2F).copy(alpha = 0.55f), Color.Transparent))
-    } else {
-        Brush.radialGradient(listOf(Color(0xFF6B4CFF).copy(alpha = 0.45f), Color(0xFF0891B2).copy(alpha = 0.2f), Color.Transparent))
-    }
 
     Column(
-        modifier = modifier.width(88.dp).alpha(if (alive) 1f else 0.4f),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier.width(fighterColumnWidth).alpha(if (alive) 1f else 0.35f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Box(contentAlignment = Alignment.Center, modifier = Modifier.size(80.dp)) {
-            Box(
-                Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(platformGlow)
-            )
+        Box(
+            contentAlignment = Alignment.BottomCenter,
+            modifier = Modifier
+                .width(fighterSpriteWidth)
+                .height(fighterSpriteHeight)
+        ) {
             if (!unit.battleRigId.isNullOrBlank()) {
-                BattleRigView(
+                BattleFighterSprite(
                     rigId = unit.battleRigId,
+                    rigManifest = rigManifest,
                     attackPulse = attackPulse,
+                    isAttacking = isAttacking,
+                    attackStyle = unit.attackStyle,
+                    mainHandArt = unit.mainHandArt,
+                    offHandArt = unit.offHandArt,
                     flipHorizontal = flipHorizontal,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier
+                        .size(fighterSpriteWidth)
+                        .align(Alignment.BottomCenter)
                 )
             } else if (unit.artAsset.isNotBlank()) {
                 AsyncImage(
                     model = "file:///android_asset/${unit.artAsset}",
                     contentDescription = unit.name,
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier
+                        .width(fighterSpriteWidth)
+                        .height(fighterSpriteHeight),
                     contentScale = ContentScale.Fit
                 )
             }
@@ -411,33 +435,20 @@ private fun BattleFighter(
         Column(
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
-                .background(Color(0xFF3B2F2F).copy(alpha = 0.88f))
-                .border(1.dp, HeroGold.copy(alpha = 0.35f), RoundedCornerShape(10.dp))
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color(0xFF3B2F2F).copy(alpha = 0.92f))
+                .border(1.dp, HeroGold.copy(alpha = 0.35f), RoundedCornerShape(8.dp))
                 .padding(horizontal = 6.dp, vertical = 4.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row(
-                Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Box(
-                    Modifier
-                        .size(14.dp)
-                        .clip(CircleShape)
-                        .background(if (isEnemy) GearOrange else HeroTeal)
-                )
-                Text(
-                    unit.name,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = SurfaceMint,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f)
-                )
-            }
+            Text(
+                unit.name,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Bold,
+                color = SurfaceMint,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
             LinearProgressIndicator(
                 progress = { hpFrac },
                 modifier = Modifier

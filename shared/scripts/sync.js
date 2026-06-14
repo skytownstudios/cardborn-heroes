@@ -5,6 +5,7 @@ const path = require("path");
 const ROOT = path.join(__dirname, "..", "..");
 const sharedContent = path.join(ROOT, "shared", "content");
 const sharedAssets = path.join(ROOT, "shared", "assets");
+const sharedConfig = path.join(ROOT, "shared", "config");
 const androidAssets = path.join(ROOT, "android", "app", "src", "main", "assets");
 
 function copyDir(src, dest) {
@@ -21,4 +22,5 @@ function copyDir(src, dest) {
 fs.mkdirSync(androidAssets, { recursive: true });
 if (fs.existsSync(sharedContent)) copyDir(sharedContent, path.join(androidAssets, "content"));
 if (fs.existsSync(sharedAssets)) copyDir(sharedAssets, androidAssets);
+if (fs.existsSync(sharedConfig)) copyDir(sharedConfig, path.join(androidAssets, "config"));
 console.log("Synced shared -> android assets");

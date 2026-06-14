@@ -6,7 +6,10 @@
       "slot": "weapon",
       "tier": "basic",
       "rarity": "basic",
+      "hands": 1,
+      "hand": "main",
       "art": "gear/sword.png",
+      "battleArt": "gear/sword.png",
       "bonus": {
         "atk": 25,
         "hp": 1,
@@ -17,6 +20,26 @@
         "ranger"
       ],
       "description": "Basic-tier A sturdy blade."
+    },
+    {
+      "id": "gear_shield",
+      "name": "Basic Shield",
+      "slot": "weapon",
+      "tier": "basic",
+      "rarity": "basic",
+      "hands": 1,
+      "hand": "off",
+      "art": "gear/shield.png",
+      "battleArt": "gear/shield.png",
+      "bonus": {
+        "atk": 5,
+        "hp": 20,
+        "def": 25
+      },
+      "compatibleRoles": [
+        "tank"
+      ],
+      "description": "Basic-tier A sturdy round shield."
     },
     {
       "id": "gear_bow",

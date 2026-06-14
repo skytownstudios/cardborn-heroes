@@ -3,17 +3,10 @@ package com.skytownstudios.cardbornheroes.data
 object HandPower {
     fun calculate(hand: Hand, content: ContentRepository): Int {
         var power = 0
-        for (slot in hand.slots) {
+        for (slot in hand.heroSlots) {
             if (slot.isEmpty) continue
-            when (slot.type) {
-                "hero" -> {
-                    val h = content.hero(slot.cardId) ?: continue
-                    power += h.stats.hp + h.stats.atk + h.stats.def
-                }
-                "gear" -> {
-                    val g = content.gear(slot.cardId) ?: continue
-                    power += g.bonus.hp + g.bonus.atk + g.bonus.def
-                }
+            LoadoutHelper.mergedStats(slot, content)?.let { stats ->
+                power += stats.hp + stats.atk + stats.def
             }
         }
         return power

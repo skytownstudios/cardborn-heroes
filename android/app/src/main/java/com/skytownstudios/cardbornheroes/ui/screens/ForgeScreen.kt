@@ -1,5 +1,6 @@
 package com.skytownstudios.cardbornheroes.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +15,7 @@ import com.skytownstudios.cardbornheroes.data.RecipeDef
 import com.skytownstudios.cardbornheroes.ui.GameViewModel
 import com.skytownstudios.cardbornheroes.ui.components.CardArt
 import com.skytownstudios.cardbornheroes.ui.components.GameButton
+import com.skytownstudios.cardbornheroes.ui.components.GamePanel
 import com.skytownstudios.cardbornheroes.ui.theme.*
 
 @Composable
@@ -53,12 +55,9 @@ private fun RecipeCard(vm: GameViewModel, recipe: RecipeDef) {
         else -> "basic"
     }
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MintBgDeep),
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    GamePanel(Modifier.fillMaxWidth()) {
         Row(
-            Modifier.padding(12.dp),
+            Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -66,7 +65,7 @@ private fun RecipeCard(vm: GameViewModel, recipe: RecipeDef) {
                 artPath = resultArt,
                 name = resultName,
                 tier = tier,
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier.size(88.dp)
             )
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 Text(recipe.name, fontWeight = FontWeight.Bold, color = TextPrimary)

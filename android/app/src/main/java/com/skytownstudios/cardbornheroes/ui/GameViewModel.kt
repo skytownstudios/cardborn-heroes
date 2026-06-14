@@ -32,6 +32,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     var equipPickerHandIndex by mutableIntStateOf(-1)
     var equipPickerSlotIndex by mutableIntStateOf(-1)
+    var equipPickerTarget by mutableStateOf("hero") // hero | main | off
 
     val activeHand: Hand get() = player.hands.getOrElse(player.activeHandIndex) { Hand() }
     val activeHandPower: Int get() = HandPower.calculate(activeHand, content)
@@ -78,7 +79,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun beginBattle() {
         val stage = content.currentStage(player.campaignStageIndex) ?: return
-        if (activeHand.slots.none { !it.isEmpty }) return
+        if (activeHand.heroSlots.none { !it.isEmpty }) return
         battle = BattleEngine.startBattle(content, activeHand, stage)
     }
 
@@ -121,54 +122,159 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (index in 0..2) updatePlayer { it.copy(activeHandIndex = index) }
     }
 
-    fun equipCard(handIndex: Int, slotIndex: Int, type: String, cardId: String) {
-        if (handIndex !in 0..2 || slotIndex !in 0..4) return
-        if (!canEquip(type, cardId, handIndex, slotIndex)) return
-        updatePlayer { s ->
-            val hands = s.hands.toMutableList()
-            val hand = hands[handIndex]
-            val slots = hand.slots.toMutableList()
-            val prev = slots[slotIndex]
-            if (!prev.isEmpty) slots[slotIndex] = HandSlot()
-            slots[slotIndex] = HandSlot(type, cardId)
-            hands[handIndex] = Hand(slots)
-            var next = s.copy(hands = hands)
-            next = checkHandBuiltQuest(next)
-            next
-        }
+    fun openHeroPicker(handIndex: Int, slotIndex: Int) {
+        equipPickerHandIndex = handIndex
+        equipPickerSlotIndex = slotIndex
+        equipPickerTarget = "hero"
+    }
+
+    fun openMainHandPicker(handIndex: Int, slotIndex: Int) {
+        equipPickerHandIndex = handIndex
+        equipPickerSlotIndex = slotIndex
+        equipPickerTarget = "main"
+    }
+
+    fun openOffHandPicker(handIndex: Int, slotIndex: Int) {
+        equipPickerHandIndex = handIndex
+        equipPickerSlotIndex = slotIndex
+        equipPickerTarget = "off"
+    }
+
+    fun closeEquipPicker() {
         equipPickerHandIndex = -1
         equipPickerSlotIndex = -1
     }
 
-    fun unequipSlot(handIndex: Int, slotIndex: Int) {
+    fun equipHero(handIndex: Int, slotIndex: Int, heroId: String) {
+        if (handIndex !in 0..2 || slotIndex !in 0..4) return
+        if (availableHeroCount(heroId, handIndex, slotIndex) <= 0) return
+        updatePlayer { s ->
+            val hands = s.hands.toMutableList()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            slots[slotIndex] = HeroLoadout(heroId = heroId)
+            hands[handIndex] = Hand(slots)
+            checkHandBuiltQuest(s.copy(hands = hands))
+        }
+        closeEquipPicker()
+    }
+
+    fun equipMainHand(handIndex: Int, slotIndex: Int, gearId: String) {
+        if (handIndex !in 0..2 || slotIndex !in 0..4) return
+        val loadout = player.hands.getOrNull(handIndex)?.heroSlots?.getOrNull(slotIndex) ?: return
+        if (loadout.isEmpty) return
+        val hero = content.hero(loadout.heroId) ?: return
+        val gear = content.gear(gearId) ?: return
+        if (!LoadoutHelper.canEquipMainHand(gear, hero, loadout, content)) return
+        if (availableGearCount(gearId, handIndex, slotIndex, "main") <= 0) return
+        updatePlayer { s ->
+            val hands = s.hands.toMutableList()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            var updated = loadout.copy(mainHandGearId = gearId)
+            if (gear.hands >= 2) updated = updated.copy(offHandGearId = "")
+            slots[slotIndex] = updated
+            hands[handIndex] = Hand(slots)
+            checkHandBuiltQuest(s.copy(hands = hands))
+        }
+        closeEquipPicker()
+    }
+
+    fun equipOffHand(handIndex: Int, slotIndex: Int, gearId: String) {
+        if (handIndex !in 0..2 || slotIndex !in 0..4) return
+        val loadout = player.hands.getOrNull(handIndex)?.heroSlots?.getOrNull(slotIndex) ?: return
+        if (loadout.isEmpty) return
+        val hero = content.hero(loadout.heroId) ?: return
+        val gear = content.gear(gearId) ?: return
+        if (!LoadoutHelper.canEquipOffHand(gear, hero, loadout, content)) return
+        if (availableGearCount(gearId, handIndex, slotIndex, "off") <= 0) return
+        updatePlayer { s ->
+            val hands = s.hands.toMutableList()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            slots[slotIndex] = loadout.copy(offHandGearId = gearId)
+            hands[handIndex] = Hand(slots)
+            checkHandBuiltQuest(s.copy(hands = hands))
+        }
+        closeEquipPicker()
+    }
+
+    fun clearHeroSlot(handIndex: Int, slotIndex: Int) {
         if (handIndex !in 0..2 || slotIndex !in 0..4) return
         updatePlayer { s ->
             val hands = s.hands.toMutableList()
-            val slots = hands[handIndex].slots.toMutableList()
-            slots[slotIndex] = HandSlot()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            slots[slotIndex] = HeroLoadout()
             hands[handIndex] = Hand(slots)
             s.copy(hands = hands)
         }
     }
 
-    fun canEquip(type: String, cardId: String, handIndex: Int, slotIndex: Int): Boolean {
-        val available = availableCount(type, cardId, handIndex, slotIndex)
-        return available > 0
+    fun clearMainHand(handIndex: Int, slotIndex: Int) {
+        if (handIndex !in 0..2 || slotIndex !in 0..4) return
+        updatePlayer { s ->
+            val hands = s.hands.toMutableList()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            val loadout = slots[slotIndex]
+            slots[slotIndex] = loadout.copy(mainHandGearId = "")
+            hands[handIndex] = Hand(slots)
+            s.copy(hands = hands)
+        }
     }
 
-    fun availableCount(type: String, cardId: String, excludeHand: Int = -1, excludeSlot: Int = -1): Int {
-        val owned = when (type) {
-            "hero" -> player.heroCounts[cardId] ?: 0
-            "gear" -> player.gearCounts[cardId] ?: 0
-            else -> 0
+    fun clearOffHand(handIndex: Int, slotIndex: Int) {
+        if (handIndex !in 0..2 || slotIndex !in 0..4) return
+        updatePlayer { s ->
+            val hands = s.hands.toMutableList()
+            val slots = hands[handIndex].heroSlots.toMutableList()
+            val loadout = slots[slotIndex]
+            slots[slotIndex] = loadout.copy(offHandGearId = "")
+            hands[handIndex] = Hand(slots)
+            s.copy(hands = hands)
         }
-        val inHands = player.hands.withIndex().sumOf { (hi, hand) ->
-            hand.slots.withIndex().count { (si, slot) ->
+    }
+
+    fun availableHeroCount(heroId: String, excludeHand: Int = -1, excludeSlot: Int = -1): Int {
+        val owned = player.heroCounts[heroId] ?: 0
+        val equipped = player.hands.withIndex().sumOf { (hi, hand) ->
+            hand.heroSlots.withIndex().count { (si, slot) ->
                 if (hi == excludeHand && si == excludeSlot) false
-                else slot.type == type && slot.cardId == cardId
+                else slot.heroId == heroId
             }
         }
-        return owned - inHands
+        return owned - equipped
+    }
+
+    fun availableGearCount(
+        gearId: String,
+        excludeHand: Int = -1,
+        excludeSlot: Int = -1,
+        excludeWhich: String? = null
+    ): Int {
+        val owned = player.gearCounts[gearId] ?: 0
+        val equipped = player.hands.withIndex().sumOf { (hi, hand) ->
+            hand.heroSlots.withIndex().sumOf { (si, slot) ->
+                var n = 0
+                if (slot.mainHandGearId == gearId) {
+                    if (!(hi == excludeHand && si == excludeSlot && excludeWhich == "main")) n++
+                }
+                if (slot.offHandGearId == gearId) {
+                    if (!(hi == excludeHand && si == excludeSlot && excludeWhich == "off")) n++
+                }
+                n
+            }
+        }
+        return owned - equipped
+    }
+
+    fun canEquipGearOnSlot(gearId: String, handIndex: Int, slotIndex: Int, which: String): Boolean {
+        val loadout = player.hands.getOrNull(handIndex)?.heroSlots?.getOrNull(slotIndex) ?: return false
+        if (loadout.isEmpty) return false
+        val hero = content.hero(loadout.heroId) ?: return false
+        val gear = content.gear(gearId) ?: return false
+        if (availableGearCount(gearId, handIndex, slotIndex, which) <= 0) return false
+        return when (which) {
+            "main" -> LoadoutHelper.canEquipMainHand(gear, hero, loadout, content)
+            "off" -> LoadoutHelper.canEquipOffHand(gear, hero, loadout, content)
+            else -> false
+        }
     }
 
     fun buyPack(packId: String): Boolean {
@@ -220,7 +326,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun skipToGuaranteed() {
+    fun skipToRareSlot() {
         val cards = packRevealCards ?: return
         packRevealIndex = cards.lastIndex
     }
@@ -304,11 +410,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return (farm.baseCrownsPerHour * HandPower.farmMultiplier(activeHandPower)).toInt()
     }
 
-    private fun handIsBuilt(hand: Hand): Boolean {
-        val hasHero = hand.slots.any { it.type == "hero" && !it.isEmpty }
-        val hasGear = hand.slots.any { it.type == "gear" && !it.isEmpty }
-        return hasHero && hasGear
-    }
+    private fun handIsBuilt(hand: Hand): Boolean = LoadoutHelper.handIsBuilt(hand)
 
     private fun checkHandBuiltQuest(s: PlayerState): PlayerState {
         if (!handIsBuilt(s.hands.getOrElse(s.activeHandIndex) { Hand() })) return s

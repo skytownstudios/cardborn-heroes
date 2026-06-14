@@ -1,12 +1,16 @@
 package com.skytownstudios.cardbornheroes.ui.screens
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,11 +24,11 @@ import com.skytownstudios.cardbornheroes.ui.components.CardArt
 import com.skytownstudios.cardbornheroes.ui.components.MiniCardArt
 import com.skytownstudios.cardbornheroes.ui.theme.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun HandScreen(vm: GameViewModel) {
-    var editingHand by remember { mutableIntStateOf(vm.player.activeHandIndex) }
-    val hand = vm.player.hands.getOrElse(editingHand) { com.skytownstudios.cardbornheroes.data.Hand() }
+    val handIndex = vm.player.activeHandIndex
+    val hand = vm.player.hands.getOrElse(handIndex) { com.skytownstudios.cardbornheroes.data.Hand() }
     val power = com.skytownstudios.cardbornheroes.data.HandPower.calculate(hand, vm.content)
     val showPicker = vm.equipPickerHandIndex >= 0
 
@@ -35,81 +39,169 @@ fun HandScreen(vm: GameViewModel) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text("Hands", fontWeight = FontWeight.Bold, color = TextPrimary, fontSize = 20.sp)
+        Text("Equip up to 5 heroes. Attach weapons to each hero.", fontSize = 12.sp, color = TextMuted)
+
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             (0..2).forEach { i ->
-                val active = i == vm.player.activeHandIndex
+                val selected = i == handIndex
                 FilterChip(
-                    selected = editingHand == i,
-                    onClick = { editingHand = i },
-                    label = { Text("Hand ${i + 1}") },
+                    selected = selected,
+                    onClick = { vm.setActiveHand(i) },
+                    label = {
+                        Text(
+                            if (selected) "Hand ${i + 1} · Active" else "Hand ${i + 1}",
+                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                        )
+                    },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = HeroGold,
                         selectedLabelColor = ButtonTextOnAccent
                     )
                 )
-                if (active) {
-                    Text("★ Active", fontSize = 11.sp, color = HeroGold, modifier = Modifier.align(Alignment.CenterVertically))
-                }
             }
         }
 
         Text("Power: $power", fontWeight = FontWeight.SemiBold, color = HeroGold)
 
-        if (editingHand != vm.player.activeHandIndex) {
-            GameButtonCompat("Set as Active Hand", onClick = { vm.setActiveHand(editingHand) })
-        }
-
-        Row(
-            Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        Column(
+            Modifier
+                .weight(1f)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            hand.slots.forEachIndexed { slotIndex, slot ->
-                val art = when (slot.type) {
-                    "hero" -> vm.content.hero(slot.cardId)?.art
-                    "gear" -> vm.content.gear(slot.cardId)?.art
-                    else -> null
-                }
-                val name = when (slot.type) {
-                    "hero" -> vm.content.hero(slot.cardId)?.name ?: "Empty"
-                    "gear" -> vm.content.gear(slot.cardId)?.name ?: "Empty"
-                    else -> "Empty"
-                }
-                Column(
-                    Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(MintBgDeep)
-                        .border(1.dp, HeroCardBorder, RoundedCornerShape(10.dp))
-                        .clickable {
-                            if (slot.isEmpty) {
-                                vm.equipPickerHandIndex = editingHand
-                                vm.equipPickerSlotIndex = slotIndex
-                            } else {
-                                vm.unequipSlot(editingHand, slotIndex)
-                            }
-                        }
-                        .padding(6.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    MiniCardArt(
-                        artPath = art,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(0.75f)
-                    )
-                    Text(name, fontSize = 9.sp, color = TextMuted, maxLines = 1)
-                }
+            hand.heroSlots.forEachIndexed { slotIndex, loadout ->
+                HeroLoadoutRow(vm, handIndex, slotIndex, loadout)
             }
         }
-
-        Text("Tap empty slot to equip · tap filled to remove", fontSize = 11.sp, color = TextMuted)
     }
 
     if (showPicker) {
-        EquipPickerSheet(vm, editingHand, vm.equipPickerSlotIndex) {
-            vm.equipPickerHandIndex = -1
-            vm.equipPickerSlotIndex = -1
+        EquipPickerSheet(vm, handIndex, vm.equipPickerSlotIndex, vm.equipPickerTarget) {
+            vm.closeEquipPicker()
         }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun HeroLoadoutRow(
+    vm: GameViewModel,
+    handIndex: Int,
+    slotIndex: Int,
+    loadout: com.skytownstudios.cardbornheroes.data.HeroLoadout
+) {
+    val hero = loadout.heroId.takeIf { it.isNotEmpty() }?.let { vm.content.hero(it) }
+    val mainGear = loadout.mainHandGearId.takeIf { it.isNotEmpty() }?.let { vm.content.gear(it) }
+    val offGear = loadout.offHandGearId.takeIf { it.isNotEmpty() }?.let { vm.content.gear(it) }
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MintBgDeep)
+            .border(1.dp, HeroCardBorder, RoundedCornerShape(12.dp))
+            .padding(10.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            Modifier
+                .width(72.dp)
+                .combinedClickable(
+                    onClick = {
+                        if (loadout.isEmpty) vm.openHeroPicker(handIndex, slotIndex)
+                    },
+                    onLongClick = {
+                        if (!loadout.isEmpty) vm.clearHeroSlot(handIndex, slotIndex)
+                    }
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            MiniCardArt(
+                artPath = hero?.art,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(0.75f)
+            )
+            Text(
+                hero?.name ?: "Hero ${slotIndex + 1}",
+                fontSize = 9.sp,
+                color = if (hero != null) TextPrimary else TextMuted,
+                maxLines = 1
+            )
+        }
+
+        Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                if (hero != null) hero.name else "Empty slot",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                color = TextPrimary
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                WeaponSubSlot(
+                    label = "Main",
+                    artPath = mainGear?.art,
+                    enabled = !loadout.isEmpty,
+                    onClick = {
+                        if (loadout.isEmpty) vm.openHeroPicker(handIndex, slotIndex)
+                        else vm.openMainHandPicker(handIndex, slotIndex)
+                    },
+                    onLongClick = {
+                        if (mainGear != null) vm.clearMainHand(handIndex, slotIndex)
+                    }
+                )
+                WeaponSubSlot(
+                    label = "Off",
+                    artPath = offGear?.art,
+                    enabled = !loadout.isEmpty && (mainGear == null || mainGear.hands < 2),
+                    onClick = {
+                        if (loadout.isEmpty) vm.openHeroPicker(handIndex, slotIndex)
+                        else vm.openOffHandPicker(handIndex, slotIndex)
+                    },
+                    onLongClick = {
+                        if (offGear != null) vm.clearOffHand(handIndex, slotIndex)
+                    }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun WeaponSubSlot(
+    label: String,
+    artPath: String?,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    onLongClick: () -> Unit
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .width(56.dp)
+            .combinedClickable(
+                enabled = enabled,
+                onClick = onClick,
+                onLongClick = onLongClick
+            )
+    ) {
+        Box(
+            Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(if (enabled) SurfaceMint else MintBgDeep.copy(alpha = 0.5f))
+                .border(1.dp, SurfaceBorder.copy(alpha = 0.4f), RoundedCornerShape(8.dp)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (!artPath.isNullOrBlank()) {
+                MiniCardArt(artPath = artPath, modifier = Modifier.size(40.dp))
+            } else {
+                Text("+", fontSize = 18.sp, color = TextMuted)
+            }
+        }
+        Text(label, fontSize = 9.sp, color = TextMuted)
     }
 }
 
@@ -119,9 +211,16 @@ private fun EquipPickerSheet(
     vm: GameViewModel,
     handIndex: Int,
     slotIndex: Int,
+    target: String,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val title = when (target) {
+        "main" -> "Main hand — slot ${slotIndex + 1}"
+        "off" -> "Off hand — slot ${slotIndex + 1}"
+        else -> "Hero — slot ${slotIndex + 1}"
+    }
+
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         LazyColumn(
             Modifier
@@ -131,26 +230,32 @@ private fun EquipPickerSheet(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item {
-                Text("Equip to slot ${slotIndex + 1}", fontWeight = FontWeight.Bold, color = TextPrimary)
+                Text(title, fontWeight = FontWeight.Bold, color = TextPrimary)
             }
-            item { Text("Heroes", fontWeight = FontWeight.SemiBold, color = TextMuted) }
-            items(vm.player.heroCounts.keys.toList()) { id ->
-                val count = vm.availableCount("hero", id, handIndex, slotIndex)
-                if (count <= 0) return@items
-                val hero = vm.content.hero(id) ?: return@items
-                EquipRow(hero.name, hero.art, count) {
-                    vm.equipCard(handIndex, slotIndex, "hero", id)
-                    onDismiss()
+            when (target) {
+                "hero" -> {
+                    items(vm.player.heroCounts.keys.toList()) { id ->
+                        val count = vm.availableHeroCount(id, handIndex, slotIndex)
+                        if (count <= 0) return@items
+                        val hero = vm.content.hero(id) ?: return@items
+                        EquipRow(hero.name, hero.art, count) {
+                            vm.equipHero(handIndex, slotIndex, id)
+                            onDismiss()
+                        }
+                    }
                 }
-            }
-            item { Text("Gear", fontWeight = FontWeight.SemiBold, color = TextMuted) }
-            items(vm.player.gearCounts.keys.toList()) { id ->
-                val count = vm.availableCount("gear", id, handIndex, slotIndex)
-                if (count <= 0) return@items
-                val gear = vm.content.gear(id) ?: return@items
-                EquipRow(gear.name, gear.art, count) {
-                    vm.equipCard(handIndex, slotIndex, "gear", id)
-                    onDismiss()
+                "main", "off" -> {
+                    items(vm.player.gearCounts.keys.toList()) { id ->
+                        if (!vm.canEquipGearOnSlot(id, handIndex, slotIndex, target)) return@items
+                        val gear = vm.content.gear(id) ?: return@items
+                        val count = vm.availableGearCount(id, handIndex, slotIndex, target)
+                        if (count <= 0) return@items
+                        EquipRow(gear.name, gear.art, count) {
+                            if (target == "main") vm.equipMainHand(handIndex, slotIndex, id)
+                            else vm.equipOffHand(handIndex, slotIndex, id)
+                            onDismiss()
+                        }
+                    }
                 }
             }
         }
@@ -175,9 +280,4 @@ private fun EquipRow(name: String, art: String, count: Int, onClick: () -> Unit)
             Text("Available: $count", fontSize = 11.sp, color = TextMuted)
         }
     }
-}
-
-@Composable
-private fun GameButtonCompat(text: String, onClick: () -> Unit) {
-    com.skytownstudios.cardbornheroes.ui.components.GameButton(text, onClick)
 }

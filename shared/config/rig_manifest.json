@@ -1,0 +1,35 @@
+{
+  "canvasSize": 1024,
+  "weaponAnchors": {
+    "mainHand": { "gripX": 512, "gripY": 640 },
+    "offHand": { "gripX": 512, "gripY": 640 }
+  },
+  "rigArtRules": {
+    "canvasPx": 1024,
+    "facing": "3/4 right",
+    "feetAnchor": { "x": 512, "y": 960 },
+    "note": "Every rig PNG is full 1024x1024. Draw ONE body part at its final position; stack at 0,0 with no scaling."
+  },
+  "roles": {
+    "knight": {
+      "layerOrder": ["leg_left", "leg_right", "torso", "arm_left", "offHandWeapon", "head", "arm_right", "mainHandWeapon"],
+      "pivots": {
+        "arm_left": { "x": 0.42, "y": 0.38 },
+        "arm_right": { "x": 0.58, "y": 0.38 }
+      },
+      "partMasks": {
+        "head": { "x0": 0.3, "y0": 0.02, "x1": 0.7, "y1": 0.3 },
+        "arm_left": { "x0": 0.14, "y0": 0.28, "x1": 0.34, "y1": 0.62 },
+        "arm_right": { "x0": 0.66, "y0": 0.28, "x1": 0.86, "y1": 0.62 },
+        "legs": { "x0": 0.24, "y0": 0.52, "x1": 0.76, "y1": 0.98 },
+        "torso": { "x0": 0.1, "y0": 0.26, "x1": 0.9, "y1": 0.56 }
+      },
+      "animations": {
+        "unarmed_attack": { "arm": "arm_right", "rotationRest": 2, "rotationSwing": -28 },
+        "melee_1h_attack": { "arm": "arm_right", "rotationRest": 2, "rotationSwing": -32 },
+        "dual_1h_offhand_tilt": 8,
+        "offhand_swing_scale": 0.15
+      }
+    }
+  }
+}

@@ -29,6 +29,7 @@ class PlayerRepository(private val context: Context) {
     }
 
     private fun encode(s: PlayerState): String = JSONObject().apply {
+        put("schemaVersion", SCHEMA_VERSION)
         put("crowns", s.crowns)
         put("sigils", s.sigils)
         put("materials", mapToJson(s.materials))
@@ -52,6 +53,12 @@ class PlayerRepository(private val context: Context) {
 
     private fun decode(json: String): PlayerState {
         val o = JSONObject(json)
+        val version = o.optInt("schemaVersion", 1)
+        val hands = if (version >= SCHEMA_VERSION) {
+            jsonToHandsV2(o.optJSONArray("hands"))
+        } else {
+            migrateHandsV1(o.optJSONArray("hands"))
+        }
         return PlayerState(
             crowns = o.optInt("crowns", 1000),
             sigils = o.optInt("sigils", 100),
@@ -59,7 +66,7 @@ class PlayerRepository(private val context: Context) {
             packInventory = jsonToMap(o.optJSONObject("packInventory")),
             heroCounts = jsonToMap(o.optJSONObject("heroCounts")),
             gearCounts = jsonToMap(o.optJSONObject("gearCounts")),
-            hands = jsonToHands(o.optJSONArray("hands")),
+            hands = hands,
             activeHandIndex = o.optInt("activeHandIndex", 0),
             campaignStageIndex = o.optInt("campaignStageIndex", 0),
             activeFarmId = o.optString("activeFarmId", "goblin_hills"),
@@ -73,6 +80,76 @@ class PlayerRepository(private val context: Context) {
             farmCrownsRemainder = o.optDouble("farmCrownsRemainder", 0.0),
             farmMaterialRemainder = o.optDouble("farmMaterialRemainder", 0.0)
         )
+    }
+
+    private fun migrateHandsV1(a: JSONArray?): List<Hand> {
+        if (a == null) return defaultStarterHands()
+        return (0 until a.length()).map { i ->
+            val slotsArr = a.getJSONArray(i)
+            val heroSlots = MutableList(5) { HeroLoadout() }
+            var lastHeroIndex = -1
+            for (j in 0 until slotsArr.length().coerceAtMost(5)) {
+                val s = slotsArr.getJSONObject(j)
+                val type = s.optString("type", "")
+                val cardId = s.optString("cardId", "")
+                if (cardId.isEmpty()) continue
+                when (type) {
+                    "hero" -> {
+                        val idx = heroSlots.indexOfFirst { it.isEmpty }
+                        if (idx >= 0) {
+                            heroSlots[idx] = HeroLoadout(heroId = cardId)
+                            lastHeroIndex = idx
+                        }
+                    }
+                    "gear" -> {
+                        if (lastHeroIndex < 0) continue
+                        val loadout = heroSlots[lastHeroIndex]
+                        heroSlots[lastHeroIndex] = when {
+                            loadout.mainHandGearId.isEmpty() -> loadout.copy(mainHandGearId = cardId)
+                            loadout.offHandGearId.isEmpty() -> loadout.copy(offHandGearId = cardId)
+                            else -> loadout
+                        }
+                    }
+                }
+            }
+            Hand(heroSlots)
+        }.let { list ->
+            if (list.size >= 3) list else list + List(3 - list.size) { Hand() }
+        }
+    }
+
+    private fun handsToJson(hands: List<Hand>): JSONArray = JSONArray().apply {
+        hands.forEach { hand ->
+            put(JSONArray().apply {
+                hand.heroSlots.forEach { slot ->
+                    put(JSONObject().apply {
+                        put("heroId", slot.heroId)
+                        put("mainHandGearId", slot.mainHandGearId)
+                        put("offHandGearId", slot.offHandGearId)
+                    })
+                }
+            })
+        }
+    }
+
+    private fun jsonToHandsV2(a: JSONArray?): List<Hand> {
+        if (a == null) return defaultStarterHands()
+        return (0 until a.length()).map { i ->
+            val slotsArr = a.getJSONArray(i)
+            val heroSlots = (0 until 5).map { j ->
+                if (j < slotsArr.length()) {
+                    val s = slotsArr.getJSONObject(j)
+                    HeroLoadout(
+                        heroId = s.optString("heroId", ""),
+                        mainHandGearId = s.optString("mainHandGearId", ""),
+                        offHandGearId = s.optString("offHandGearId", "")
+                    )
+                } else HeroLoadout()
+            }
+            Hand(heroSlots)
+        }.let { list ->
+            if (list.size >= 3) list else list + List(3 - list.size) { Hand() }
+        }
     }
 
     private fun mapToJson(m: Map<String, Int>): JSONObject =
@@ -91,35 +168,6 @@ class PlayerRepository(private val context: Context) {
         if (a == null) return emptySet()
         return buildSet {
             for (i in 0 until a.length()) add(a.getString(i))
-        }
-    }
-
-    private fun handsToJson(hands: List<Hand>): JSONArray = JSONArray().apply {
-        hands.forEach { hand ->
-            put(JSONArray().apply {
-                hand.slots.forEach { slot ->
-                    put(JSONObject().apply {
-                        put("type", slot.type)
-                        put("cardId", slot.cardId)
-                    })
-                }
-            })
-        }
-    }
-
-    private fun jsonToHands(a: JSONArray?): List<Hand> {
-        if (a == null) return List(3) { Hand() }
-        return (0 until a.length()).map { i ->
-            val slotsArr = a.getJSONArray(i)
-            val slots = (0 until 5).map { j ->
-                if (j < slotsArr.length()) {
-                    val s = slotsArr.getJSONObject(j)
-                    HandSlot(s.optString("type", ""), s.optString("cardId", ""))
-                } else HandSlot()
-            }
-            Hand(slots)
-        }.let { list ->
-            if (list.size >= 3) list else list + List(3 - list.size) { Hand() }
         }
     }
 
@@ -142,5 +190,9 @@ class PlayerRepository(private val context: Context) {
             craftsDone = o.optInt("craftsDone"),
             questsClaimed = o.optInt("questsClaimed")
         )
+    }
+
+    companion object {
+        const val SCHEMA_VERSION = 2
     }
 }
