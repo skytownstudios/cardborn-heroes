@@ -1,0 +1,24 @@
+# iOS
+ios/*.xcodeproj
+ios/*.xcworkspace
+ios/xcuserdata/
+ios/DerivedData/
+ios/build/
+ios/Config/Secrets.xcconfig
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+*.apk
+
+# Shared secrets
+.DS_Store
+
+# Python / dev artifacts
+__pycache__/
+*.logcat
+emulator_screen.png
+android/launch_test.png

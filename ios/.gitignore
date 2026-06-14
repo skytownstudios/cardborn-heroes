@@ -1,0 +1,21 @@
+# Xcode
+*.xcodeproj
+*.xcworkspace
+xcuserdata/
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+
+# Swift Package Manager
+.swiftpm/
+.build/
+
+# Secrets (example file is committed; copy locally for Mac builds)
+Config/Secrets.xcconfig
+
+# macOS
+.DS_Store
+
+# Local / tooling
+.skill-test/
