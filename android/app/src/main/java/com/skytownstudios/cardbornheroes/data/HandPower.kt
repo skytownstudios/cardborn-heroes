@@ -6,12 +6,12 @@ object HandPower {
         for (slot in hand.heroSlots) {
             if (slot.isEmpty) continue
             LoadoutHelper.mergedStats(slot, content)?.let { stats ->
-                power += stats.hp + stats.atk + stats.def
+                power += PowerScale.combatPower(stats)
             }
         }
         return power
     }
 
     fun farmMultiplier(handPower: Int): Float =
-        (handPower / 500f).coerceIn(0.5f, 3.0f)
+        (handPower / 20f).coerceIn(0.5f, 3.0f)
 }

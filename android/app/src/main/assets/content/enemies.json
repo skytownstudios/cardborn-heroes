@@ -1,0 +1,114 @@
+{
+  "enemies": [
+    {
+      "id": "enemy_goblin",
+      "name": "Goblin Raider",
+      "role": "ranger",
+      "art": "heroes/archer/portrait.png",
+      "battleRig": "archer",
+      "stats": { "hp": 3, "atk": 4, "def": 2, "energy": 0 },
+      "weakTo": ["tank"],
+      "strongAgainst": ["caster"],
+      "counterTip": "Bulwark tanks absorb their quick strikes."
+    },
+    {
+      "id": "enemy_wolf",
+      "name": "Dire Wolf",
+      "role": "ranger",
+      "art": "heroes/archer/portrait.png",
+      "battleRig": "knight",
+      "stats": { "hp": 4, "atk": 4, "def": 2, "energy": 0 },
+      "weakTo": ["caster"],
+      "strongAgainst": ["ranger"],
+      "counterTip": "Casters pick them off before they rush your back line."
+    },
+    {
+      "id": "enemy_bandit",
+      "name": "Highway Bandit",
+      "role": "ranger",
+      "art": "heroes/archer/portrait.png",
+      "battleRig": "archer",
+      "stats": { "hp": 3, "atk": 5, "def": 2, "energy": 0 },
+      "weakTo": ["tank"],
+      "strongAgainst": ["caster"],
+      "counterTip": "Frontline shields blunt their opening volley."
+    },
+    {
+      "id": "enemy_shade",
+      "name": "Arcane Shade",
+      "role": "caster",
+      "art": "heroes/mage/portrait.png",
+      "battleRig": "mage",
+      "stats": { "hp": 2, "atk": 5, "def": 2, "energy": 1 },
+      "weakTo": ["ranger"],
+      "strongAgainst": ["tank"],
+      "counterTip": "Rangers outpace their slow hexes."
+    },
+    {
+      "id": "enemy_brute",
+      "name": "Cave Brute",
+      "role": "tank",
+      "art": "heroes/knight/portrait.png",
+      "battleRig": "knight",
+      "stats": { "hp": 6, "atk": 2, "def": 3, "energy": 0 },
+      "weakTo": ["caster"],
+      "strongAgainst": ["ranger"],
+      "counterTip": "Arcane burst pierces their thick hide."
+    },
+    {
+      "id": "enemy_skeleton",
+      "name": "Risen Skeleton",
+      "role": "tank",
+      "art": "heroes/knight/portrait.png",
+      "battleRig": "knight",
+      "stats": { "hp": 5, "atk": 3, "def": 3, "energy": 0 },
+      "weakTo": ["caster"],
+      "strongAgainst": ["ranger"],
+      "counterTip": "Holy arcane damage shatters bone armor."
+    },
+    {
+      "id": "enemy_wisp",
+      "name": "Ruin Wisp",
+      "role": "caster",
+      "art": "heroes/mage/portrait.png",
+      "battleRig": "mage",
+      "stats": { "hp": 2, "atk": 6, "def": 1, "energy": 1 },
+      "weakTo": ["ranger"],
+      "strongAgainst": ["tank"],
+      "counterTip": "Fast rangers close the gap before their nova."
+    },
+    {
+      "id": "enemy_ogre",
+      "name": "Hill Ogre",
+      "role": "tank",
+      "art": "heroes/knight/portrait.png",
+      "battleRig": "knight",
+      "stats": { "hp": 8, "atk": 3, "def": 4, "energy": 0 },
+      "weakTo": ["caster", "ranger"],
+      "strongAgainst": ["tank"],
+      "counterTip": "Kite with rangers or melt with sustained caster damage."
+    },
+    {
+      "id": "enemy_warlock",
+      "name": "Hex Warlock",
+      "role": "caster",
+      "art": "heroes/mage/portrait.png",
+      "battleRig": "mage",
+      "stats": { "hp": 3, "atk": 7, "def": 2, "energy": 2 },
+      "weakTo": ["ranger"],
+      "strongAgainst": ["tank"],
+      "counterTip": "Interrupt with ranged pressure before rituals complete."
+    },
+    {
+      "id": "enemy_champion",
+      "name": "Fallen Champion",
+      "role": "tank",
+      "art": "heroes/knight/portrait.png",
+      "battleRig": "knight",
+      "stats": { "hp": 10, "atk": 4, "def": 5, "energy": 1 },
+      "weakTo": ["caster"],
+      "strongAgainst": ["ranger"],
+      "counterTip": "Stack arcane damage to break their ward."
+    }
+  ]
+}

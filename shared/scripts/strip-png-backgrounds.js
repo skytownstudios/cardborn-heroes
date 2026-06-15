@@ -199,4 +199,30 @@ for (const dir of stripDirs) {
   });
 }
 
+const mapNodes = [
+  path.join(ASSETS, "maps", "node_cleared.png"),
+  path.join(ASSETS, "maps", "node_current.png"),
+  path.join(ASSETS, "maps", "node_locked.png"),
+];
+for (const p of mapNodes) {
+  if (fs.existsSync(p)) {
+    console.log("Strip map node:", path.relative(ASSETS, p));
+    stripFile(p);
+  }
+}
+
+const mapFarmIcons = [
+  "farm_goblin_hills.png",
+  "farm_arcane_ruins.png",
+  "farm_heroes_rest.png",
+  "farm_cardborn_vault.png",
+];
+for (const name of mapFarmIcons) {
+  const p = path.join(ASSETS, "maps", name);
+  if (fs.existsSync(p)) {
+    console.log("Strip farm icon:", path.join("maps", name));
+    stripFile(p);
+  }
+}
+
 console.log("Done.");

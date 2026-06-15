@@ -54,6 +54,7 @@ $map = @{
     "tab_shop.png"              = "ui\tab_shop.png"
     "icon_quests.png"           = "ui\icon_quests.png"
     "icon_bag.png"              = "ui\icon_bag.png"
+    "icon_farm_chest.png"       = "ui\icon_farm_chest.png"
     "icon_profile.png"          = "ui\icon_profile.png"
     "hand_slot_empty.png"       = "ui\hand_slot_empty.png"
     "whispering_woods.png"      = "maps\whispering_woods.png"

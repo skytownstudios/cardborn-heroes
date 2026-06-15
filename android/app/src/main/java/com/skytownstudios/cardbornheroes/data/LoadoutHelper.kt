@@ -16,18 +16,14 @@ object LoadoutHelper {
 
     fun mergedStats(loadout: HeroLoadout, content: ContentRepository): HeroStats? {
         val hero = content.hero(loadout.heroId) ?: return null
-        var hp = hero.stats.hp
-        var atk = hero.stats.atk
-        var def = hero.stats.def
+        var stats = PowerScale.scaledStats(hero.stats, loadout.heroStars)
         listOf(loadout.mainHandGearId, loadout.offHandGearId).forEach { gearId ->
             if (gearId.isEmpty()) return@forEach
             content.gear(gearId)?.bonus?.let { b ->
-                hp += b.hp
-                atk += b.atk
-                def += b.def
+                stats = PowerScale.applyGearBonus(stats, b)
             }
         }
-        return HeroStats(hp, atk, def)
+        return stats
     }
 
     fun mainHandArt(loadout: HeroLoadout, content: ContentRepository): String? =

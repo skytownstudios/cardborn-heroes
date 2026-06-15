@@ -2,48 +2,122 @@
   "heroes": [
     {
       "id": "hero_knight",
-      "name": "Basic Knight",
+      "name": "Knight Recruit",
       "role": "tank",
       "tier": "basic",
+      "unitKind": "unit",
       "rarity": "basic",
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 1200,
-        "atk": 85,
-        "def": 60
+        "hp": 5,
+        "atk": 2,
+        "def": 3,
+        "energy": 0
       },
-      "description": "Basic-tier Frontline shield bearer."
+      "description": "A frontline recruit — combine or promote into a true Hero."
     },
     {
       "id": "hero_archer",
-      "name": "Basic Archer",
+      "name": "Archer Recruit",
       "role": "ranger",
       "tier": "basic",
+      "unitKind": "unit",
       "rarity": "basic",
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 750,
-        "atk": 110,
-        "def": 35
+        "hp": 3,
+        "atk": 4,
+        "def": 3,
+        "energy": 0
       },
-      "description": "Basic-tier Ranged striker."
+      "description": "A ranged recruit — combine or promote into a true Hero."
     },
     {
       "id": "hero_mage",
-      "name": "Basic Mage",
+      "name": "Mage Recruit",
       "role": "caster",
       "tier": "basic",
+      "unitKind": "unit",
       "rarity": "basic",
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 680,
-        "atk": 130,
-        "def": 25
+        "hp": 2,
+        "atk": 5,
+        "def": 3,
+        "energy": 0
       },
-      "description": "Basic-tier Arcane damage dealer."
+      "description": "An arcane recruit — combine or promote into a true Hero."
+    },
+    {
+      "id": "hero_bulwark",
+      "name": "Bulwark Champion",
+      "role": "tank",
+      "tier": "basic",
+      "unitKind": "hero",
+      "rarity": "basic",
+      "art": "heroes/knight/portrait.png",
+      "battleRig": "knight",
+      "stats": {
+        "hp": 8,
+        "atk": 3,
+        "def": 5,
+        "energy": 0
+      },
+      "description": "A forged Hero tank promoted from recruits."
+    },
+    {
+      "id": "hero_galehand",
+      "name": "Galehand Ranger",
+      "role": "ranger",
+      "tier": "basic",
+      "unitKind": "hero",
+      "rarity": "basic",
+      "art": "heroes/archer/portrait.png",
+      "battleRig": "archer",
+      "stats": {
+        "hp": 5,
+        "atk": 6,
+        "def": 5,
+        "energy": 0
+      },
+      "description": "A forged Hero ranger promoted from recruits."
+    },
+    {
+      "id": "hero_embersage",
+      "name": "Embersage",
+      "role": "caster",
+      "tier": "basic",
+      "unitKind": "hero",
+      "rarity": "basic",
+      "art": "heroes/mage/portrait.png",
+      "battleRig": "mage",
+      "stats": {
+        "hp": 3,
+        "atk": 8,
+        "def": 5,
+        "energy": 0
+      },
+      "description": "A forged Hero caster promoted from recruits."
+    },
+    {
+      "id": "hero_nightfang",
+      "name": "Nightfang",
+      "role": "ranger",
+      "tier": "basic",
+      "unitKind": "hero",
+      "rarity": "basic",
+      "art": "heroes/archer/portrait.png",
+      "battleRig": "archer",
+      "stats": {
+        "hp": 5,
+        "atk": 6,
+        "def": 5,
+        "energy": 0
+      },
+      "description": "A shadow striker forged from mixed recruits."
     },
     {
       "id": "hero_knight_common",
@@ -54,9 +128,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 1380,
-        "atk": 97,
-        "def": 69
+        "hp": 38,
+        "atk": 15,
+        "def": 23,
+        "energy": 0
       },
       "description": "Common-tier Frontline shield bearer."
     },
@@ -69,9 +144,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 862,
-        "atk": 126,
-        "def": 40
+        "hp": 23,
+        "atk": 30,
+        "def": 23,
+        "energy": 0
       },
       "description": "Common-tier Ranged striker."
     },
@@ -84,9 +160,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 781,
-        "atk": 149,
-        "def": 28
+        "hp": 15,
+        "atk": 38,
+        "def": 23,
+        "energy": 0
       },
       "description": "Common-tier Arcane damage dealer."
     },
@@ -99,9 +176,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 1584,
-        "atk": 112,
-        "def": 79
+        "hp": 288,
+        "atk": 115,
+        "def": 173,
+        "energy": 0
       },
       "description": "Uncommon-tier Frontline shield bearer."
     },
@@ -114,9 +192,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 990,
-        "atk": 145,
-        "def": 46
+        "hp": 173,
+        "atk": 231,
+        "def": 173,
+        "energy": 0
       },
       "description": "Uncommon-tier Ranged striker."
     },
@@ -129,9 +208,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 897,
-        "atk": 171,
-        "def": 33
+        "hp": 115,
+        "atk": 288,
+        "def": 173,
+        "energy": 0
       },
       "description": "Uncommon-tier Arcane damage dealer."
     },
@@ -144,9 +224,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 1824,
-        "atk": 129,
-        "def": 91
+        "hp": 2189,
+        "atk": 876,
+        "def": 1314,
+        "energy": 0
       },
       "description": "Rare-tier Frontline shield bearer."
     },
@@ -159,9 +240,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 1140,
-        "atk": 167,
-        "def": 53
+        "hp": 1314,
+        "atk": 1752,
+        "def": 1314,
+        "energy": 0
       },
       "description": "Rare-tier Ranged striker."
     },
@@ -174,9 +256,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 1033,
-        "atk": 197,
-        "def": 38
+        "hp": 876,
+        "atk": 2189,
+        "def": 1314,
+        "energy": 0
       },
       "description": "Rare-tier Arcane damage dealer."
     },
@@ -189,9 +272,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 2100,
-        "atk": 148,
-        "def": 105
+        "hp": 16626,
+        "atk": 6651,
+        "def": 9976,
+        "energy": 0
       },
       "description": "Epic-tier Frontline shield bearer."
     },
@@ -204,9 +288,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 1312,
-        "atk": 192,
-        "def": 61
+        "hp": 9976,
+        "atk": 13301,
+        "def": 9976,
+        "energy": 0
       },
       "description": "Epic-tier Ranged striker."
     },
@@ -219,9 +304,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 1190,
-        "atk": 227,
-        "def": 43
+        "hp": 6651,
+        "atk": 16626,
+        "def": 9976,
+        "energy": 0
       },
       "description": "Epic-tier Arcane damage dealer."
     },
@@ -234,9 +320,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 2400,
-        "atk": 170,
-        "def": 120
+        "hp": 126256,
+        "atk": 50502,
+        "def": 75754,
+        "energy": 0
       },
       "description": "Mythic-tier Frontline shield bearer."
     },
@@ -249,9 +336,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 1500,
-        "atk": 220,
-        "def": 70
+        "hp": 75754,
+        "atk": 101005,
+        "def": 75754,
+        "energy": 0
       },
       "description": "Mythic-tier Ranged striker."
     },
@@ -264,9 +352,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 1360,
-        "atk": 260,
-        "def": 50
+        "hp": 50502,
+        "atk": 126256,
+        "def": 75754,
+        "energy": 0
       },
       "description": "Mythic-tier Arcane damage dealer."
     },
@@ -279,9 +368,10 @@
       "art": "heroes/knight/portrait.png",
       "battleRig": "knight",
       "stats": {
-        "hp": 2820,
-        "atk": 199,
-        "def": 141
+        "hp": 958755,
+        "atk": 383502,
+        "def": 575253,
+        "energy": 0
       },
       "description": "Cardborn-tier Frontline shield bearer."
     },
@@ -294,9 +384,10 @@
       "art": "heroes/archer/portrait.png",
       "battleRig": "archer",
       "stats": {
-        "hp": 1762,
-        "atk": 258,
-        "def": 82
+        "hp": 575253,
+        "atk": 767004,
+        "def": 575253,
+        "energy": 0
       },
       "description": "Cardborn-tier Ranged striker."
     },
@@ -309,9 +400,10 @@
       "art": "heroes/mage/portrait.png",
       "battleRig": "mage",
       "stats": {
-        "hp": 1598,
-        "atk": 305,
-        "def": 58
+        "hp": 383502,
+        "atk": 958755,
+        "def": 575253,
+        "energy": 0
       },
       "description": "Cardborn-tier Arcane damage dealer."
     }

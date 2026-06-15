@@ -38,47 +38,85 @@ class PlayerRepository(private val context: Context) {
         put("gearCounts", mapToJson(s.gearCounts))
         put("hands", handsToJson(s.hands))
         put("activeHandIndex", s.activeHandIndex)
-        put("campaignStageIndex", s.campaignStageIndex)
+        put("activeCampaignId", s.activeCampaignId)
+        put("activeCampaignLevel", s.activeCampaignLevel)
+        put("campaignBestLevel", mapToJson(s.campaignBestLevel))
         put("activeFarmId", s.activeFarmId)
         put("lastFarmTickEpochMs", s.lastFarmTickEpochMs)
         put("questProgress", mapToJson(s.questProgress))
         put("questClaimed", setToJson(s.questClaimed))
         put("discoveredHeroes", setToJson(s.discoveredHeroes))
         put("discoveredGear", setToJson(s.discoveredGear))
+        put("discoveredEnemies", setToJson(s.discoveredEnemies))
         put("discoveredRecipes", setToJson(s.discoveredRecipes))
         put("stats", statsToJson(s.stats))
         put("farmCrownsRemainder", s.farmCrownsRemainder)
         put("farmMaterialRemainder", s.farmMaterialRemainder)
+        put("pendingFarmRewards", pendingFarmToJson(s.pendingFarmRewards))
     }.toString()
 
     private fun decode(json: String): PlayerState {
         val o = JSONObject(json)
         val version = o.optInt("schemaVersion", 1)
-        val hands = if (version >= SCHEMA_VERSION) {
+        val hands = if (version >= 2) {
             jsonToHandsV2(o.optJSONArray("hands"))
         } else {
             migrateHandsV1(o.optJSONArray("hands"))
         }
+        val rawHeroCounts = jsonToMap(o.optJSONObject("heroCounts"))
+        val heroCounts = if (version < 3) HeroInventory.migrateFlatCounts(rawHeroCounts) else rawHeroCounts
+        val (activeCampaignId, activeCampaignLevel, campaignBestLevel) = if (version < 4) {
+            Triple("whispering_woods", 1, emptyMap<String, Int>())
+        } else {
+            Triple(
+                o.optString("activeCampaignId", "whispering_woods"),
+                o.optInt("activeCampaignLevel", 1),
+                jsonToMap(o.optJSONObject("campaignBestLevel"))
+            )
+        }
         return PlayerState(
-            crowns = o.optInt("crowns", 1000),
-            sigils = o.optInt("sigils", 100),
+            crowns = o.optInt("crowns", 2000),
+            sigils = o.optInt("sigils", 1000),
             materials = jsonToMap(o.optJSONObject("materials")),
             packInventory = jsonToMap(o.optJSONObject("packInventory")),
-            heroCounts = jsonToMap(o.optJSONObject("heroCounts")),
+            heroCounts = heroCounts,
             gearCounts = jsonToMap(o.optJSONObject("gearCounts")),
             hands = hands,
             activeHandIndex = o.optInt("activeHandIndex", 0),
-            campaignStageIndex = o.optInt("campaignStageIndex", 0),
+            activeCampaignId = activeCampaignId,
+            activeCampaignLevel = activeCampaignLevel,
+            campaignBestLevel = campaignBestLevel,
             activeFarmId = o.optString("activeFarmId", "goblin_hills"),
             lastFarmTickEpochMs = o.optLong("lastFarmTickEpochMs", System.currentTimeMillis()),
             questProgress = jsonToMap(o.optJSONObject("questProgress")),
             questClaimed = jsonToSet(o.optJSONArray("questClaimed")),
             discoveredHeroes = jsonToSet(o.optJSONArray("discoveredHeroes")),
             discoveredGear = jsonToSet(o.optJSONArray("discoveredGear")),
+            discoveredEnemies = jsonToSet(o.optJSONArray("discoveredEnemies")),
             discoveredRecipes = jsonToSet(o.optJSONArray("discoveredRecipes")),
             stats = jsonToStats(o.optJSONObject("stats")),
             farmCrownsRemainder = o.optDouble("farmCrownsRemainder", 0.0),
-            farmMaterialRemainder = o.optDouble("farmMaterialRemainder", 0.0)
+            farmMaterialRemainder = o.optDouble("farmMaterialRemainder", 0.0),
+            pendingFarmRewards = jsonToPendingFarm(o.optJSONObject("pendingFarmRewards"))
+        )
+    }
+
+    private fun pendingFarmToJson(p: PendingFarmRewards): JSONObject = JSONObject().apply {
+        put("crowns", p.crowns)
+        put("materials", mapToJson(p.materials))
+        put("heroes", mapToJson(p.heroes))
+        put("gear", mapToJson(p.gear))
+        put("packs", mapToJson(p.packs))
+    }
+
+    private fun jsonToPendingFarm(o: JSONObject?): PendingFarmRewards {
+        if (o == null) return PendingFarmRewards()
+        return PendingFarmRewards(
+            crowns = o.optInt("crowns"),
+            materials = jsonToMap(o.optJSONObject("materials")),
+            heroes = jsonToMap(o.optJSONObject("heroes")),
+            gear = jsonToMap(o.optJSONObject("gear")),
+            packs = jsonToMap(o.optJSONObject("packs"))
         )
     }
 
@@ -124,6 +162,7 @@ class PlayerRepository(private val context: Context) {
                 hand.heroSlots.forEach { slot ->
                     put(JSONObject().apply {
                         put("heroId", slot.heroId)
+                        put("heroStars", slot.heroStars)
                         put("mainHandGearId", slot.mainHandGearId)
                         put("offHandGearId", slot.offHandGearId)
                     })
@@ -141,6 +180,7 @@ class PlayerRepository(private val context: Context) {
                     val s = slotsArr.getJSONObject(j)
                     HeroLoadout(
                         heroId = s.optString("heroId", ""),
+                        heroStars = s.optInt("heroStars", 0),
                         mainHandGearId = s.optString("mainHandGearId", ""),
                         offHandGearId = s.optString("offHandGearId", "")
                     )
@@ -193,6 +233,6 @@ class PlayerRepository(private val context: Context) {
     }
 
     companion object {
-        const val SCHEMA_VERSION = 2
+        const val SCHEMA_VERSION = 4
     }
 }

@@ -31,6 +31,8 @@ import com.skytownstudios.cardbornheroes.ui.theme.MintBg
 import com.skytownstudios.cardbornheroes.ui.theme.MintBgDeep
 import com.skytownstudios.cardbornheroes.ui.theme.NavBarBrown
 import com.skytownstudios.cardbornheroes.ui.theme.NavBarMuted
+import com.skytownstudios.cardbornheroes.ui.theme.PanelBottom
+import com.skytownstudios.cardbornheroes.ui.theme.PanelTop
 import com.skytownstudios.cardbornheroes.ui.theme.SurfaceBorder
 
 enum class GameTab(val backgroundAsset: String) {
@@ -59,7 +61,7 @@ fun GameTabBackground(tab: GameTab, modifier: Modifier = Modifier, content: @Com
                         listOf(
                             MintBg.copy(alpha = 0.82f),
                             MintBgDeep.copy(alpha = 0.88f),
-                            Color(0xFFEDE6D8).copy(alpha = 0.92f)
+                            PanelBottom.copy(alpha = 0.92f)
                         )
                     )
                 )
@@ -81,7 +83,7 @@ fun GamePanel(
             .clip(RoundedCornerShape(14.dp))
             .background(
                 Brush.verticalGradient(
-                    listOf(Color(0xFFF8F2E8), Color(0xFFEDE6D8))
+                    listOf(PanelTop, PanelBottom)
                 )
             )
             .border(2.dp, SurfaceBorder.copy(alpha = 0.55f), RoundedCornerShape(14.dp))

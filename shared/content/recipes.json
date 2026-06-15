@@ -2,9 +2,11 @@
   "recipes": [
     {
       "id": "recipe_knight",
+      "recipeType": "craft",
       "resultType": "hero",
       "resultId": "hero_knight",
-      "name": "Craft Basic Knight",
+      "resultStars": 0,
+      "name": "Craft Knight Recruit",
       "materials": [
         { "id": "mat_hero_essence", "qty": 10 },
         { "id": "mat_steel", "qty": 5 }
@@ -12,9 +14,11 @@
     },
     {
       "id": "recipe_archer",
+      "recipeType": "craft",
       "resultType": "hero",
       "resultId": "hero_archer",
-      "name": "Craft Basic Archer",
+      "resultStars": 0,
+      "name": "Craft Archer Recruit",
       "materials": [
         { "id": "mat_hero_essence", "qty": 10 },
         { "id": "mat_steel", "qty": 3 }
@@ -22,9 +26,11 @@
     },
     {
       "id": "recipe_mage",
+      "recipeType": "craft",
       "resultType": "hero",
       "resultId": "hero_mage",
-      "name": "Craft Basic Mage",
+      "resultStars": 0,
+      "name": "Craft Mage Recruit",
       "materials": [
         { "id": "mat_hero_essence", "qty": 10 },
         { "id": "mat_arcane_dust", "qty": 8 }
@@ -32,6 +38,7 @@
     },
     {
       "id": "recipe_sword",
+      "recipeType": "craft",
       "resultType": "gear",
       "resultId": "gear_sword",
       "name": "Craft Basic Sword",
@@ -39,6 +46,7 @@
     },
     {
       "id": "recipe_bow",
+      "recipeType": "craft",
       "resultType": "gear",
       "resultId": "gear_bow",
       "name": "Craft Basic Bow",
@@ -46,10 +54,60 @@
     },
     {
       "id": "recipe_staff",
+      "recipeType": "craft",
       "resultType": "gear",
       "resultId": "gear_staff",
       "name": "Craft Basic Staff",
       "materials": [{ "id": "mat_arcane_dust", "qty": 10 }]
+    },
+    {
+      "id": "promote_bulwark",
+      "recipeType": "promotion",
+      "resultType": "hero",
+      "resultId": "hero_bulwark",
+      "resultStars": 0,
+      "name": "Promote Bulwark Champion",
+      "materials": [{ "id": "mat_hero_essence", "qty": 5 }],
+      "heroInputs": [
+        { "heroId": "hero_knight", "stars": 0, "qty": 2 }
+      ]
+    },
+    {
+      "id": "promote_galehand",
+      "recipeType": "promotion",
+      "resultType": "hero",
+      "resultId": "hero_galehand",
+      "resultStars": 0,
+      "name": "Promote Galehand Ranger",
+      "materials": [{ "id": "mat_hero_essence", "qty": 5 }],
+      "heroInputs": [
+        { "heroId": "hero_archer", "stars": 0, "qty": 2 }
+      ]
+    },
+    {
+      "id": "promote_embersage",
+      "recipeType": "promotion",
+      "resultType": "hero",
+      "resultId": "hero_embersage",
+      "resultStars": 0,
+      "name": "Promote Embersage",
+      "materials": [{ "id": "mat_arcane_dust", "qty": 8 }],
+      "heroInputs": [
+        { "heroId": "hero_mage", "stars": 0, "qty": 2 }
+      ]
+    },
+    {
+      "id": "promote_nightfang",
+      "recipeType": "promotion",
+      "resultType": "hero",
+      "resultId": "hero_nightfang",
+      "resultStars": 0,
+      "name": "Forge Nightfang",
+      "materials": [{ "id": "mat_arcane_dust", "qty": 6 }],
+      "heroInputs": [
+        { "heroId": "hero_archer", "stars": 0, "qty": 1 },
+        { "heroId": "hero_knight", "stars": 0, "qty": 1 }
+      ]
     }
   ]
 }

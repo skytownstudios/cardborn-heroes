@@ -14,9 +14,13 @@ import kotlinx.coroutines.launch
 class GameViewModel(application: Application) : AndroidViewModel(application) {
     val content = ContentRepository(application)
     private val playerRepo = PlayerRepository(application)
+    private val prefsRepo = AppPreferencesRepository(application)
 
     var player by mutableStateOf(PlayerState())
         private set
+
+    private var _darkMode by mutableStateOf(true)
+    val darkMode: Boolean get() = _darkMode
 
     var battle by mutableStateOf<BattleState?>(null)
         private set
@@ -34,11 +38,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     var equipPickerSlotIndex by mutableIntStateOf(-1)
     var equipPickerTarget by mutableStateOf("hero") // hero | main | off
 
+    var slotDetailHandIndex by mutableIntStateOf(-1)
+    var slotDetailSlotIndex by mutableIntStateOf(-1)
+    var slotDetailTarget by mutableStateOf("hero") // hero | main | off
+
+    var showFarmClaimModal by mutableStateOf(false)
+    var lastClaimedFarmRewards by mutableStateOf(PendingFarmRewards())
+        private set
+
     val activeHand: Hand get() = player.hands.getOrElse(player.activeHandIndex) { Hand() }
     val activeHandPower: Int get() = HandPower.calculate(activeHand, content)
 
     init {
         viewModelScope.launch {
+            _darkMode = prefsRepo.loadDarkMode()
             player = playerRepo.load()
             applyFarmTicks()
             playerRepo.save(player)
@@ -48,6 +61,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 playerRepo.save(player)
             }
         }
+    }
+
+    fun setDarkMode(enabled: Boolean) {
+        _darkMode = enabled
+        viewModelScope.launch { prefsRepo.setDarkMode(enabled) }
     }
 
     private fun updatePlayer(block: (PlayerState) -> PlayerState) {
@@ -61,26 +79,85 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     private fun applyTickResult(s: PlayerState, result: FarmEngine.TickResult): PlayerState {
-        var next = s.copy(
-            crowns = s.crowns + result.crownsGained,
+        val pending = s.pendingFarmRewards
+        val nextPending = pending.copy(
+            crowns = pending.crowns + result.crownsGained,
+            materials = PendingFarmRewards.mergeCounts(pending.materials, result.materialGains),
+            heroes = PendingFarmRewards.mergeCounts(pending.heroes, result.heroDrops),
+            gear = PendingFarmRewards.mergeCounts(pending.gear, result.gearDrops),
+            packs = PendingFarmRewards.mergeCounts(pending.packs, result.packDrops)
+        )
+        return s.copy(
             lastFarmTickEpochMs = result.newLastTickMs,
             farmCrownsRemainder = result.crownsRemainder,
             farmMaterialRemainder = result.materialRemainder,
-            stats = s.stats.copy(
-                crownsEarned = s.stats.crownsEarned + result.crownsGained
-            )
+            pendingFarmRewards = nextPending
         )
-        next = addMaterials(next, result.materialGains)
-        next = addHeroes(next, result.heroDrops)
-        next = addGear(next, result.gearDrops)
-        next = addPacks(next, result.packDrops)
-        return next
+    }
+
+    fun claimFarmRewards() {
+        val pending = player.pendingFarmRewards
+        if (pending.isEmpty) return
+        lastClaimedFarmRewards = pending
+        updatePlayer { s ->
+            var next = s.copy(pendingFarmRewards = PendingFarmRewards())
+            if (pending.crowns > 0) {
+                next = next.copy(
+                    crowns = next.crowns + pending.crowns,
+                    stats = next.stats.copy(
+                        crownsEarned = next.stats.crownsEarned + pending.crowns
+                    )
+                )
+            }
+            next = addMaterials(next, pending.materials)
+            next = addHeroes(next, pending.heroes)
+            next = addGear(next, pending.gear)
+            next = addPacks(next, pending.packs)
+            next
+        }
+        showFarmClaimModal = true
+    }
+
+    fun dismissFarmClaimModal() {
+        showFarmClaimModal = false
+        lastClaimedFarmRewards = PendingFarmRewards()
+    }
+
+    fun selectedCampaignRun(): CampaignRun? =
+        content.campaignRun(player.activeCampaignId, player.activeCampaignLevel)
+
+    fun maxPlayableLevel(campaignId: String): Int {
+        val best = player.campaignBestLevel[campaignId] ?: 0
+        return CampaignScaler.maxPlayableLevel(best)
+    }
+
+    fun selectCampaign(campaignId: String) {
+        if (content.campaignZone(campaignId) == null) return
+        updatePlayer { s ->
+            val maxLvl = CampaignScaler.maxPlayableLevel(s.campaignBestLevel[campaignId] ?: 0)
+            s.copy(
+                activeCampaignId = campaignId,
+                activeCampaignLevel = 1.coerceIn(1, maxLvl)
+            )
+        }
+    }
+
+    fun setCampaignLevel(level: Int) {
+        val maxLvl = maxPlayableLevel(player.activeCampaignId)
+        val clamped = level.coerceIn(1, maxLvl)
+        if (clamped == player.activeCampaignLevel) return
+        updatePlayer { it.copy(activeCampaignLevel = clamped) }
     }
 
     fun beginBattle() {
-        val stage = content.currentStage(player.campaignStageIndex) ?: return
+        val run = selectedCampaignRun() ?: return
         if (activeHand.heroSlots.none { !it.isEmpty }) return
-        battle = BattleEngine.startBattle(content, activeHand, stage)
+        val state = BattleEngine.startBattle(content, activeHand, run)
+        battle = state
+        val enemyIds = BattleEngine.enemyIdsInBattle(state)
+        if (enemyIds.isNotEmpty()) {
+            updatePlayer { it.copy(discoveredEnemies = it.discoveredEnemies + enemyIds) }
+        }
     }
 
     fun advanceBattle() {
@@ -89,19 +166,26 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun closeBattle(victory: Boolean) {
-        val reward = battle?.crownRewardPending ?: 0
+        val b = battle
+        val crownReward = b?.crownRewardPending ?: 0
+        val materialReward = b?.materialRewardPending ?: emptyMap()
         if (victory) {
+            val campaignId = b?.campaignId?.takeIf { it.isNotEmpty() } ?: player.activeCampaignId
+            val level = b?.campaignLevel ?: player.activeCampaignLevel
             updatePlayer { s ->
+                val prevBest = s.campaignBestLevel[campaignId] ?: 0
+                val newBest = if (level > prevBest) {
+                    s.campaignBestLevel.toMutableMap().apply { put(campaignId, level) }
+                } else s.campaignBestLevel
                 var next = s.copy(
-                    crowns = s.crowns + reward,
-                    campaignStageIndex = (s.campaignStageIndex + 1).coerceAtMost(
-                        content.campaign.stages.lastIndex
-                    ),
+                    crowns = s.crowns + crownReward,
+                    campaignBestLevel = newBest,
                     stats = s.stats.copy(
                         wins = s.stats.wins + 1,
-                        crownsEarned = s.stats.crownsEarned + reward
+                        crownsEarned = s.stats.crownsEarned + crownReward
                     )
                 )
+                next = addMaterials(next, materialReward)
                 next = incrementQuest(next, "campaign_wins")
                 next = checkHandBuiltQuest(next)
                 next
@@ -145,13 +229,24 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         equipPickerSlotIndex = -1
     }
 
-    fun equipHero(handIndex: Int, slotIndex: Int, heroId: String) {
+    fun openSlotDetail(handIndex: Int, slotIndex: Int, target: String) {
+        slotDetailHandIndex = handIndex
+        slotDetailSlotIndex = slotIndex
+        slotDetailTarget = target
+    }
+
+    fun closeSlotDetail() {
+        slotDetailHandIndex = -1
+        slotDetailSlotIndex = -1
+    }
+
+    fun equipHero(handIndex: Int, slotIndex: Int, heroId: String, heroStars: Int = 0) {
         if (handIndex !in 0..2 || slotIndex !in 0..4) return
-        if (availableHeroCount(heroId, handIndex, slotIndex) <= 0) return
+        if (availableHeroCount(heroId, heroStars, handIndex, slotIndex) <= 0) return
         updatePlayer { s ->
             val hands = s.hands.toMutableList()
             val slots = hands[handIndex].heroSlots.toMutableList()
-            slots[slotIndex] = HeroLoadout(heroId = heroId)
+            slots[slotIndex] = HeroLoadout(heroId = heroId, heroStars = heroStars)
             hands[handIndex] = Hand(slots)
             checkHandBuiltQuest(s.copy(hands = hands))
         }
@@ -231,15 +326,48 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun availableHeroCount(heroId: String, excludeHand: Int = -1, excludeSlot: Int = -1): Int {
-        val owned = player.heroCounts[heroId] ?: 0
+    fun availableHeroCount(
+        heroId: String,
+        stars: Int = 0,
+        excludeHand: Int = -1,
+        excludeSlot: Int = -1
+    ): Int {
+        val owned = HeroInventory.count(player.heroCounts, heroId, stars)
         val equipped = player.hands.withIndex().sumOf { (hi, hand) ->
             hand.heroSlots.withIndex().count { (si, slot) ->
                 if (hi == excludeHand && si == excludeSlot) false
-                else slot.heroId == heroId
+                else slot.heroId == heroId && slot.heroStars == stars
             }
         }
         return owned - equipped
+    }
+
+    fun heroStacksForPicker(excludeHand: Int, excludeSlot: Int): List<HeroStack> =
+        HeroInventory.allStacks(player.heroCounts).mapNotNull { stack ->
+            val avail = availableHeroCount(stack.heroId, stack.stars, excludeHand, excludeSlot)
+            if (avail > 0) stack.copy(count = avail) else null
+        }
+
+    fun fusionCandidates(): List<HeroStack> =
+        HeroInventory.allStacks(player.heroCounts).filter { stack ->
+            stack.stars < HeroInventory.MAX_STARS &&
+                availableHeroCount(stack.heroId, stack.stars) >= 3
+        }
+
+    fun canFuseHero(heroId: String, stars: Int): Boolean =
+        stars < HeroInventory.MAX_STARS && availableHeroCount(heroId, stars) >= 3
+
+    fun fuseHeroStack(heroId: String, stars: Int): Boolean {
+        if (!canFuseHero(heroId, stars)) return false
+        updatePlayer { s ->
+            var heroes = HeroInventory.remove(s.heroCounts, heroId, stars, 3)
+            heroes = HeroInventory.add(heroes, heroId, stars + 1, 1)
+            s.copy(
+                heroCounts = heroes,
+                stats = s.stats.copy(craftsDone = s.stats.craftsDone + 1)
+            )
+        }
+        return true
     }
 
     fun availableGearCount(
@@ -365,13 +493,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 mats[m.id] = (mats[m.id] ?: 0) - m.qty
             }
             mats = mats.filterValues { it > 0 }.toMutableMap()
+            var heroes = s.heroCounts
+            recipe.heroInputs.forEach { input ->
+                heroes = HeroInventory.remove(heroes, input.heroId, input.stars, input.qty)
+            }
             var next = s.copy(
                 materials = mats,
+                heroCounts = heroes,
                 discoveredRecipes = s.discoveredRecipes + recipeId,
                 stats = s.stats.copy(craftsDone = s.stats.craftsDone + 1)
             )
             next = when (recipe.resultType) {
-                "hero" -> addHeroes(next, mapOf(recipe.resultId to 1))
+                "hero" -> addHeroes(
+                    next,
+                    mapOf(HeroInventory.stackKey(recipe.resultId, recipe.resultStars) to 1)
+                )
                 "gear" -> addGear(next, mapOf(recipe.resultId to 1))
                 else -> next
             }
@@ -380,8 +516,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return true
     }
 
-    fun canCraft(recipe: RecipeDef): Boolean =
-        recipe.materials.all { m -> (player.materials[m.id] ?: 0) >= m.qty }
+    fun canCraft(recipe: RecipeDef): Boolean {
+        if (!recipe.materials.all { m -> (player.materials[m.id] ?: 0) >= m.qty }) return false
+        return recipe.heroInputs.all { input ->
+            availableHeroCount(input.heroId, input.stars) >= input.qty
+        }
+    }
 
     fun claimQuest(questId: String): Boolean {
         val quest = content.quest(questId) ?: return false
@@ -410,6 +550,58 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         return (farm.baseCrownsPerHour * HandPower.farmMultiplier(activeHandPower)).toInt()
     }
 
+    fun farmHandMultiplier(): Float = HandPower.farmMultiplier(activeHandPower)
+
+    fun effectiveMaterialPerHour(farm: FarmArea): String {
+        val mult = farmHandMultiplier().toDouble()
+        val rate = if (farm.id == "cardborn_vault") 1.0 * mult else farm.primaryQtyPerHour * mult
+        return formatFarmHourlyRate(rate)
+    }
+
+    fun effectiveSecondaryDrop(farm: FarmArea): Pair<String, String>? {
+        val drop = farm.secondaryDrop ?: return null
+        val rate = drop.ratePerHour * farmHandMultiplier()
+        val tierLabel = drop.tier.replaceFirstChar { it.uppercase() }
+        val label = when (drop.type) {
+            "hero" -> "Hero ($tierLabel)"
+            "gear" -> "Gear ($tierLabel)"
+            else -> "Bonus"
+        }
+        return label to formatFarmChancePercent(rate)
+    }
+
+    fun effectivePackDrops(farm: FarmArea): List<FarmPackRateRow> =
+        farm.packDrops.mapNotNull { drop ->
+            val pack = content.pack(drop.packId) ?: return@mapNotNull null
+            val rate = drop.ratePerHour * farmHandMultiplier()
+            FarmPackRateRow(
+                label = "${pack.tier.replaceFirstChar { it.uppercase() }} pack",
+                rate = formatFarmChancePercent(rate),
+                icon = "ui/pack_ascendant_${pack.tier}.png",
+                packName = pack.name
+            )
+        }
+
+    private fun formatFarmChancePercent(hourlyRate: Double): String {
+        if (hourlyRate <= 0) return "0%/hr"
+        val pct = hourlyRate * 100.0
+        return when {
+            pct >= 10 -> String.format("%.0f%%/hr", pct)
+            pct >= 1 -> String.format("%.1f%%/hr", pct)
+            else -> String.format("%.2f%%/hr", pct)
+        }
+    }
+
+    private fun formatFarmHourlyRate(rate: Double): String {
+        if (rate <= 0) return "0/hr"
+        return when {
+            rate >= 100 -> "${rate.toInt()}/hr"
+            rate >= 1 -> String.format("%.1f/hr", rate)
+            rate >= 0.01 -> String.format("%.1f/hr", rate)
+            else -> String.format("%.2f/hr", rate)
+        }
+    }
+
     private fun handIsBuilt(hand: Hand): Boolean = LoadoutHelper.handIsBuilt(hand)
 
     private fun checkHandBuiltQuest(s: PlayerState): PlayerState {
@@ -436,10 +628,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun addHeroes(s: PlayerState, gains: Map<String, Int>): PlayerState {
         if (gains.isEmpty()) return s
-        val heroes = s.heroCounts.toMutableMap()
+        var heroes = s.heroCounts
         var discovered = s.discoveredHeroes
-        gains.forEach { (id, qty) ->
-            heroes[id] = (heroes[id] ?: 0) + qty
+        gains.forEach { (key, qty) ->
+            val (id, stars) = HeroInventory.parseStackKey(key)
+            heroes = HeroInventory.add(heroes, id, stars, qty)
             discovered = discovered + id
         }
         return s.copy(heroCounts = heroes, discoveredHeroes = discovered)

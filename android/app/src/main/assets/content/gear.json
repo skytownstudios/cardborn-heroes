@@ -11,9 +11,10 @@
       "art": "gear/sword.png",
       "battleArt": "gear/sword.png",
       "bonus": {
-        "atk": 25,
-        "hp": 1,
-        "def": 10
+        "atk": 2,
+        "hp": 0,
+        "def": 1,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -32,9 +33,10 @@
       "art": "gear/shield.png",
       "battleArt": "gear/shield.png",
       "bonus": {
-        "atk": 5,
-        "hp": 20,
-        "def": 25
+        "atk": 0,
+        "hp": 1,
+        "def": 2,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank"
@@ -49,9 +51,10 @@
       "rarity": "basic",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 35,
-        "hp": 50,
-        "def": 1
+        "atk": 3,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -66,9 +69,10 @@
       "rarity": "basic",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 40,
-        "hp": 30,
-        "def": 1
+        "atk": 2,
+        "hp": 0,
+        "def": 0,
+        "energy": 1
       },
       "compatibleRoles": [
         "caster"
@@ -83,9 +87,10 @@
       "rarity": "common",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 28,
-        "hp": 1,
-        "def": 11
+        "atk": 15,
+        "hp": 0,
+        "def": 8,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -101,9 +106,10 @@
       "rarity": "common",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 40,
-        "hp": 57,
-        "def": 1
+        "atk": 23,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -118,9 +124,10 @@
       "rarity": "common",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 46,
-        "hp": 34,
-        "def": 1
+        "atk": 15,
+        "hp": 0,
+        "def": 0,
+        "energy": 8
       },
       "compatibleRoles": [
         "caster"
@@ -135,9 +142,10 @@
       "rarity": "uncommon",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 33,
-        "hp": 1,
-        "def": 13
+        "atk": 115,
+        "hp": 0,
+        "def": 58,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -153,9 +161,10 @@
       "rarity": "uncommon",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 46,
-        "hp": 66,
-        "def": 1
+        "atk": 173,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -170,9 +179,10 @@
       "rarity": "uncommon",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 52,
-        "hp": 39,
-        "def": 1
+        "atk": 115,
+        "hp": 0,
+        "def": 0,
+        "energy": 58
       },
       "compatibleRoles": [
         "caster"
@@ -187,9 +197,10 @@
       "rarity": "rare",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 38,
-        "hp": 1,
-        "def": 15
+        "atk": 876,
+        "hp": 0,
+        "def": 438,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -205,9 +216,10 @@
       "rarity": "rare",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 53,
-        "hp": 76,
-        "def": 1
+        "atk": 1314,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -222,9 +234,10 @@
       "rarity": "rare",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 60,
-        "hp": 45,
-        "def": 1
+        "atk": 876,
+        "hp": 0,
+        "def": 0,
+        "energy": 438
       },
       "compatibleRoles": [
         "caster"
@@ -239,9 +252,10 @@
       "rarity": "epic",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 43,
-        "hp": 1,
-        "def": 17
+        "atk": 6651,
+        "hp": 0,
+        "def": 3325,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -257,9 +271,10 @@
       "rarity": "epic",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 61,
-        "hp": 87,
-        "def": 1
+        "atk": 9976,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -274,9 +289,10 @@
       "rarity": "epic",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 70,
-        "hp": 52,
-        "def": 1
+        "atk": 6651,
+        "hp": 0,
+        "def": 0,
+        "energy": 3325
       },
       "compatibleRoles": [
         "caster"
@@ -291,9 +307,10 @@
       "rarity": "mythic",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 50,
-        "hp": 1,
-        "def": 20
+        "atk": 50502,
+        "hp": 0,
+        "def": 25251,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -309,9 +326,10 @@
       "rarity": "mythic",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 70,
-        "hp": 100,
-        "def": 1
+        "atk": 75754,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -326,9 +344,10 @@
       "rarity": "mythic",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 80,
-        "hp": 60,
-        "def": 1
+        "atk": 50502,
+        "hp": 0,
+        "def": 0,
+        "energy": 25251
       },
       "compatibleRoles": [
         "caster"
@@ -343,9 +362,10 @@
       "rarity": "cardborn",
       "art": "gear/sword.png",
       "bonus": {
-        "atk": 58,
-        "hp": 1,
-        "def": 23
+        "atk": 383502,
+        "hp": 0,
+        "def": 191751,
+        "energy": 0
       },
       "compatibleRoles": [
         "tank",
@@ -361,9 +381,10 @@
       "rarity": "cardborn",
       "art": "gear/bow.png",
       "bonus": {
-        "atk": 82,
-        "hp": 117,
-        "def": 1
+        "atk": 575253,
+        "hp": 0,
+        "def": 0,
+        "energy": 0
       },
       "compatibleRoles": [
         "ranger"
@@ -378,9 +399,10 @@
       "rarity": "cardborn",
       "art": "gear/staff.png",
       "bonus": {
-        "atk": 94,
-        "hp": 70,
-        "def": 1
+        "atk": 383502,
+        "hp": 0,
+        "def": 0,
+        "energy": 191751
       },
       "compatibleRoles": [
         "caster"

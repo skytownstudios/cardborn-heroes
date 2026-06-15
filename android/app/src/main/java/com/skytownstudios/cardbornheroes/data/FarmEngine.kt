@@ -87,7 +87,8 @@ object FarmEngine {
                 }
             }
 
-            farm.rarePackDrop?.let { drop ->
+            for (drop in farm.packDrops) {
+                if (drop.ratePerHour <= 0) continue
                 val chance = drop.ratePerHour * mult / 60.0
                 if (Random.nextDouble() < chance) {
                     packDrops[drop.packId] = (packDrops[drop.packId] ?: 0) + 1

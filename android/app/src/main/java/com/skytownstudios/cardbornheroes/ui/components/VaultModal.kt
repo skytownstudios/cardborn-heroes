@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.skytownstudios.cardbornheroes.data.HeroInventory
 import com.skytownstudios.cardbornheroes.ui.GameViewModel
 import com.skytownstudios.cardbornheroes.ui.theme.MintBgDeep
 import com.skytownstudios.cardbornheroes.ui.theme.TextMuted
@@ -62,10 +63,13 @@ fun VaultModal(vm: GameViewModel) {
                     }
                 }
             }
-            VaultSection("Heroes") {
-                player.heroCounts.forEach { (id, qty) ->
-                    val name = vm.content.hero(id)?.name ?: id
-                    VaultRow(name, "×$qty")
+            VaultSection("Heroes & Units") {
+                player.heroCounts.forEach { (key, qty) ->
+                    val (id, stars) = HeroInventory.parseStackKey(key)
+                    val hero = vm.content.hero(id)
+                    val base = hero?.name ?: id
+                    val label = if (stars > 0) "$base ★$stars" else base
+                    VaultRow(label, "×$qty")
                 }
             }
             VaultSection("Gear") {

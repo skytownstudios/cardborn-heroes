@@ -2,14 +2,18 @@ package com.skytownstudios.cardbornheroes.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -24,7 +28,8 @@ fun ProfileSheet(vm: GameViewModel) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val player = vm.player
     val stats = player.stats
-    val stage = vm.content.currentStage(player.campaignStageIndex)
+    val zone = vm.content.campaignZone(player.activeCampaignId)
+    val run = vm.selectedCampaignRun()
     val cardsOwned = player.heroCounts.values.sum() + player.gearCounts.values.sum()
     val winRate = if (stats.wins + stats.losses > 0) {
         (stats.wins * 100 / (stats.wins + stats.losses))
@@ -32,7 +37,8 @@ fun ProfileSheet(vm: GameViewModel) {
 
     ModalBottomSheet(
         onDismissRequest = { vm.showProfile = false },
-        sheetState = sheetState
+        sheetState = sheetState,
+        containerColor = MaterialTheme.colorScheme.surface
     ) {
         Column(
             Modifier
@@ -43,13 +49,26 @@ fun ProfileSheet(vm: GameViewModel) {
         ) {
             Text("Profile", fontWeight = FontWeight.Bold, color = TextPrimary)
             StatRow("Hand Power", vm.activeHandPower.toString())
-            StatRow("Campaign Stage", stage?.name ?: "—")
+            StatRow("Campaign", run?.displayName ?: zone?.name ?: "—")
             StatRow("Cards Owned", cardsOwned.toString())
             StatRow("Packs Opened", stats.packsOpened.toString())
             StatRow("Win Rate", "$winRate%")
             StatRow("Crowns Earned", stats.crownsEarned.toString())
             StatRow("Crafts Completed", stats.craftsDone.toString())
             StatRow("Quests Done", stats.questsClaimed.toString())
+            HorizontalDivider()
+            Text("Settings", fontWeight = FontWeight.SemiBold, color = TextMuted)
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Dark Mode", color = TextPrimary, fontWeight = FontWeight.Medium)
+                Switch(
+                    checked = vm.darkMode,
+                    onCheckedChange = { vm.setDarkMode(it) }
+                )
+            }
             HorizontalDivider()
             Text("Damage Types", fontWeight = FontWeight.SemiBold, color = TextMuted)
             Text("Coming soon — per-Hand damage breakdown.", color = TextMuted)

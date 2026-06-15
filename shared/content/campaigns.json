@@ -1,56 +1,111 @@
 {
   "campaigns": [
     {
-      "id": "campaign_main",
-      "name": "Cardborn Campaign",
-      "description": "The path of the Cardborn begins here.",
-      "stages": [
-        { "id": "stage_1", "name": "Whispering Woods 1", "recommendedPower": 200, "rewards": { "crowns": 100 } },
-        { "id": "stage_2", "name": "Whispering Woods 2", "recommendedPower": 350, "rewards": { "crowns": 150 } },
-        { "id": "stage_3", "name": "Whispering Woods 3", "recommendedPower": 500, "rewards": { "crowns": 200 } }
-      ]
+      "id": "whispering_woods",
+      "name": "Whispering Woods",
+      "description": "Goblin trails and wolf packs — farm steel and hero essence.",
+      "mapArt": "maps/whispering_woods.png",
+      "icon": "ui/mat_steel.png",
+      "baseRecommendedPower": 10,
+      "enemies": ["enemy_goblin", "enemy_wolf", "enemy_bandit", "enemy_brute"],
+      "rewards": {
+        "crowns": { "min": 20, "max": 35 },
+        "materials": [
+          { "id": "mat_steel", "min": 1, "max": 3, "weight": 0.9 },
+          { "id": "mat_hero_essence", "min": 0, "max": 1, "weight": 0.4 }
+        ]
+      }
+    },
+    {
+      "id": "arcane_ruins",
+      "name": "Arcane Ruins",
+      "description": "Shades and wisps haunt these halls — arcane dust drops here.",
+      "mapArt": "maps/whispering_woods.png",
+      "icon": "ui/mat_arcane_dust.png",
+      "baseRecommendedPower": 22,
+      "enemies": ["enemy_shade", "enemy_wisp", "enemy_skeleton", "enemy_warlock"],
+      "rewards": {
+        "crowns": { "min": 35, "max": 60 },
+        "materials": [
+          { "id": "mat_arcane_dust", "min": 2, "max": 5, "weight": 0.95 },
+          { "id": "mat_hero_essence", "min": 0, "max": 2, "weight": 0.35 }
+        ]
+      }
+    },
+    {
+      "id": "heroes_rest",
+      "name": "Hero's Rest",
+      "description": "Fallen guardians guard a shrine rich in hero essence.",
+      "mapArt": "maps/whispering_woods.png",
+      "icon": "ui/mat_hero_essence.png",
+      "baseRecommendedPower": 42,
+      "enemies": ["enemy_skeleton", "enemy_brute", "enemy_ogre"],
+      "rewards": {
+        "crowns": { "min": 55, "max": 95 },
+        "materials": [
+          { "id": "mat_hero_essence", "min": 3, "max": 6, "weight": 1.0 },
+          { "id": "mat_steel", "min": 1, "max": 3, "weight": 0.5 }
+        ]
+      }
+    },
+    {
+      "id": "vault_approach",
+      "name": "Vault Approach",
+      "description": "Elite mobs guard mixed materials before the Cardborn Vault.",
+      "mapArt": "maps/whispering_woods.png",
+      "icon": "ui/icon_bag.png",
+      "baseRecommendedPower": 60,
+      "enemies": ["enemy_ogre", "enemy_warlock", "enemy_champion"],
+      "rewards": {
+        "crowns": { "min": 80, "max": 140 },
+        "materials": [
+          { "id": "mat_steel", "min": 2, "max": 5, "weight": 0.7 },
+          { "id": "mat_arcane_dust", "min": 2, "max": 5, "weight": 0.7 },
+          { "id": "mat_hero_essence", "min": 3, "max": 7, "weight": 0.85 }
+        ]
+      }
     }
   ],
   "farmAreas": [
     {
       "id": "goblin_hills",
       "name": "Goblin Hills",
-      "description": "AFK farm mobs for Crowns and steel.",
+      "description": "AFK farm mobs for Crowns, steel, and basic gear.",
       "baseCrownsPerHour": 120,
       "primaryMaterial": "mat_steel",
       "primaryQtyPerHour": 2,
-      "secondaryDrop": { "type": "gear", "tier": "basic", "ratePerHour": 0.005 },
-      "rarePackDrop": { "packId": "ascendant_basic", "ratePerHour": 0.0002 }
+      "secondaryDrop": { "type": "gear", "tier": "basic", "ratePerHour": 0.005 }
     },
     {
       "id": "arcane_ruins",
       "name": "Arcane Ruins",
-      "description": "Farm arcane dust from lingering spirits.",
+      "description": "Farm arcane dust and basic heroes from spirits.",
       "baseCrownsPerHour": 80,
       "primaryMaterial": "mat_arcane_dust",
       "primaryQtyPerHour": 3,
-      "secondaryDrop": { "type": "hero", "tier": "basic", "ratePerHour": 0.003 },
-      "rarePackDrop": { "packId": "ascendant_common", "ratePerHour": 0.0001 }
+      "secondaryDrop": { "type": "hero", "tier": "basic", "ratePerHour": 0.003 }
     },
     {
       "id": "heroes_rest",
       "name": "Hero's Rest",
-      "description": "Quiet shrine yielding hero essence.",
+      "description": "Quiet shrine yielding hero essence and common gear.",
       "baseCrownsPerHour": 60,
       "primaryMaterial": "mat_hero_essence",
       "primaryQtyPerHour": 2,
-      "secondaryDrop": { "type": "gear", "tier": "common", "ratePerHour": 0.002 },
-      "rarePackDrop": { "packId": "ascendant_uncommon", "ratePerHour": 0.00008 }
+      "secondaryDrop": { "type": "gear", "tier": "common", "ratePerHour": 0.002 }
     },
     {
       "id": "cardborn_vault",
       "name": "Cardborn Vault",
-      "description": "Rare mixed materials and pack drops.",
+      "description": "Rare mixed materials, heroes, and ascendant packs.",
       "baseCrownsPerHour": 40,
       "primaryMaterial": "mat_steel",
       "primaryQtyPerHour": 1,
       "secondaryDrop": { "type": "hero", "tier": "uncommon", "ratePerHour": 0.001 },
-      "rarePackDrop": { "packId": "ascendant_rare", "ratePerHour": 0.00005 }
+      "packDrops": [
+        { "packId": "ascendant_basic", "ratePerHour": 0.01 },
+        { "packId": "ascendant_common", "ratePerHour": 0 }
+      ]
     }
   ]
 }

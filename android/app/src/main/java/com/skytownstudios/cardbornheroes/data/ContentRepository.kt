@@ -9,27 +9,31 @@ class ContentRepository(context: Context) {
     val rigManifest: RigManifest by lazy { RigManifest.load(context) }
 
     val heroes: List<HeroDef> by lazy { loadHeroes() }
+    val enemies: List<EnemyDef> by lazy { loadEnemies() }
     val gear: List<GearDef> by lazy { loadGear() }
     val materials: List<MaterialDef> by lazy { loadMaterials() }
     val packs: List<PackDef> by lazy { loadPacks() }
     val recipes: List<RecipeDef> by lazy { loadRecipes() }
     val quests: List<QuestDef> by lazy { loadQuests() }
-    val campaign: CampaignDef by lazy { loadCampaign() }
+    val campaignZones: List<CampaignZone> by lazy { loadCampaignZones() }
     val farmAreas: List<FarmArea> by lazy { loadFarmAreas() }
 
     fun hero(id: String): HeroDef? = heroes.find { it.id == id }
+    fun enemy(id: String): EnemyDef? = enemies.find { it.id == id }
     fun gear(id: String): GearDef? = gear.find { it.id == id }
     fun material(id: String): MaterialDef? = materials.find { it.id == id }
     fun pack(id: String): PackDef? = packs.find { it.id == id }
     fun recipe(id: String): RecipeDef? = recipes.find { it.id == id }
     fun quest(id: String): QuestDef? = quests.find { it.id == id }
     fun farm(id: String): FarmArea? = farmAreas.find { it.id == id }
+    fun campaignZone(id: String): CampaignZone? = campaignZones.find { it.id == id }
+
+    fun campaignRun(campaignId: String, level: Int): CampaignRun? =
+        campaignZone(campaignId)?.let { CampaignScaler.resolve(it, level) }
 
     fun heroesOfTier(tier: String): List<HeroDef> = heroes.filter { it.tier == tier }
+    fun heroesOfUnitKind(unitKind: String): List<HeroDef> = heroes.filter { it.unitKind == unitKind }
     fun gearOfTier(tier: String): List<GearDef> = gear.filter { it.tier == tier }
-
-    fun currentStage(stageIndex: Int): CampaignStage? =
-        campaign.stages.getOrNull(stageIndex)
 
     private fun loadJson(name: String): JSONObject =
         assets.open("content/$name").bufferedReader().use { JSONObject(it.readText()) }
@@ -44,9 +48,41 @@ class ContentRepository(context: Context) {
                 name = o.getString("name"),
                 role = o.getString("role"),
                 tier = o.getString("tier"),
+                unitKind = o.optString("unitKind", "hero"),
                 art = o.getString("art"),
                 battleRig = o.optString("battleRig", "knight"),
-                stats = HeroStats(stats.getInt("hp"), stats.getInt("atk"), stats.getInt("def"))
+                stats = HeroStats(
+                    stats.getInt("hp"),
+                    stats.getInt("atk"),
+                    stats.getInt("def"),
+                    stats.optInt("energy", 0)
+                )
+            )
+        }
+    }
+
+    private fun loadEnemies(): List<EnemyDef> {
+        val arr = loadJson("enemies.json").getJSONArray("enemies")
+        return (0 until arr.length()).map { i ->
+            val o = arr.getJSONObject(i)
+            val stats = o.getJSONObject("stats")
+            val weak = o.getJSONArray("weakTo")
+            val strong = o.getJSONArray("strongAgainst")
+            EnemyDef(
+                id = o.getString("id"),
+                name = o.getString("name"),
+                role = o.getString("role"),
+                art = o.getString("art"),
+                battleRig = o.optString("battleRig", "knight"),
+                stats = HeroStats(
+                    stats.getInt("hp"),
+                    stats.getInt("atk"),
+                    stats.getInt("def"),
+                    stats.optInt("energy", 0)
+                ),
+                weakTo = (0 until weak.length()).map { weak.getString(it) },
+                strongAgainst = (0 until strong.length()).map { strong.getString(it) },
+                counterTip = o.getString("counterTip")
             )
         }
     }
@@ -70,7 +106,12 @@ class ContentRepository(context: Context) {
                 battleArt = battleArt,
                 hands = hands,
                 hand = hand,
-                bonus = GearBonus(bonus.getInt("atk"), bonus.getInt("hp"), bonus.getInt("def")),
+                bonus = GearBonus(
+                    bonus.getInt("atk"),
+                    bonus.getInt("hp"),
+                    bonus.getInt("def"),
+                    bonus.optInt("energy", 0)
+                ),
                 compatibleRoles = (0 until roles.length()).map { roles.getString(it) }
             )
         }
@@ -115,6 +156,12 @@ class ContentRepository(context: Context) {
         return (0 until arr.length()).map { i ->
             val o = arr.getJSONObject(i)
             val mats = o.getJSONArray("materials")
+            val heroInputs = o.optJSONArray("heroInputs")?.let { inputs ->
+                (0 until inputs.length()).map { j ->
+                    val h = inputs.getJSONObject(j)
+                    RecipeHeroInput(h.getString("heroId"), h.optInt("stars", 0), h.getInt("qty"))
+                }
+            } ?: emptyList()
             RecipeDef(
                 id = o.getString("id"),
                 name = o.getString("name"),
@@ -123,7 +170,10 @@ class ContentRepository(context: Context) {
                 materials = (0 until mats.length()).map { j ->
                     val m = mats.getJSONObject(j)
                     RecipeMaterial(m.getString("id"), m.getInt("qty"))
-                }
+                },
+                recipeType = o.optString("recipeType", "craft"),
+                heroInputs = heroInputs,
+                resultStars = o.optInt("resultStars", 0)
             )
         }
     }
@@ -143,24 +193,39 @@ class ContentRepository(context: Context) {
         }
     }
 
-    private fun loadCampaign(): CampaignDef {
-        val campaigns = loadJson("campaigns.json").getJSONArray("campaigns")
-        val c = campaigns.getJSONObject(0)
-        val stages = c.getJSONArray("stages")
-        return CampaignDef(
-            id = c.getString("id"),
-            name = c.getString("name"),
-            stages = (0 until stages.length()).map { i ->
-                val s = stages.getJSONObject(i)
-                val rewards = s.getJSONObject("rewards")
-                CampaignStage(
-                    id = s.getString("id"),
-                    name = s.getString("name"),
-                    recommendedPower = s.getInt("recommendedPower"),
-                    crownReward = rewards.getInt("crowns")
+    private fun parseCampaignZone(o: org.json.JSONObject): CampaignZone {
+        val rewards = o.getJSONObject("rewards")
+        val crowns = rewards.getJSONObject("crowns")
+        val enemyArr = o.getJSONArray("enemies")
+        val matArr = rewards.optJSONArray("materials")
+        val materialRewards = if (matArr != null) {
+            (0 until matArr.length()).map { j ->
+                val m = matArr.getJSONObject(j)
+                CampaignMaterialReward(
+                    id = m.getString("id"),
+                    min = m.getInt("min"),
+                    max = m.getInt("max"),
+                    weight = m.optDouble("weight", 1.0)
                 )
             }
+        } else emptyList()
+        return CampaignZone(
+            id = o.getString("id"),
+            name = o.getString("name"),
+            description = o.getString("description"),
+            mapArt = o.optString("mapArt", "maps/whispering_woods.png"),
+            icon = o.optString("icon", "ui/icon_bag.png"),
+            baseRecommendedPower = o.getInt("baseRecommendedPower"),
+            enemyIds = (0 until enemyArr.length()).map { enemyArr.getString(it) },
+            crownRewardMin = crowns.getInt("min"),
+            crownRewardMax = crowns.getInt("max"),
+            materialRewards = materialRewards
         )
+    }
+
+    private fun loadCampaignZones(): List<CampaignZone> {
+        val arr = loadJson("campaigns.json").getJSONArray("campaigns")
+        return (0 until arr.length()).map { i -> parseCampaignZone(arr.getJSONObject(i)) }
     }
 
     private fun loadFarmAreas(): List<FarmArea> {
@@ -170,8 +235,18 @@ class ContentRepository(context: Context) {
             val secondary = o.optJSONObject("secondaryDrop")?.let { d ->
                 FarmDrop(d.getString("type"), d.getString("tier"), d.getDouble("ratePerHour"))
             }
-            val rare = o.optJSONObject("rarePackDrop")?.let { d ->
-                FarmPackDrop(d.getString("packId"), d.getDouble("ratePerHour"))
+            val packDrops = buildList {
+                val arr = o.optJSONArray("packDrops")
+                if (arr != null) {
+                    for (j in 0 until arr.length()) {
+                        val d = arr.getJSONObject(j)
+                        add(FarmPackDrop(d.getString("packId"), d.getDouble("ratePerHour")))
+                    }
+                } else {
+                    o.optJSONObject("rarePackDrop")?.let { d ->
+                        add(FarmPackDrop(d.getString("packId"), d.getDouble("ratePerHour")))
+                    }
+                }
             }
             FarmArea(
                 id = o.getString("id"),
@@ -181,7 +256,7 @@ class ContentRepository(context: Context) {
                 primaryMaterial = o.getString("primaryMaterial"),
                 primaryQtyPerHour = o.getDouble("primaryQtyPerHour"),
                 secondaryDrop = secondary,
-                rarePackDrop = rare
+                packDrops = packDrops
             )
         }
     }

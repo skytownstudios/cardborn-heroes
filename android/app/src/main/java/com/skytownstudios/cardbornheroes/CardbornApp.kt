@@ -91,7 +91,7 @@ fun CardbornApp() {
 
 
 
-    CardbornHeroesTheme {
+    CardbornHeroesTheme(darkTheme = vm.darkMode) {
 
         var selectedTab by remember { mutableIntStateOf(0) }
 
